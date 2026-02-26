@@ -4,6 +4,8 @@ from pybricks.pupdevices import Motor, ColorSensor
 from pybricks.parameters import Axis, Color, Button, Port
 
 from enum import Enum
+from math import pi
+from time import sleep_ms, ticks_us
 
 
 hub = PrimeHub()
@@ -73,6 +75,30 @@ class Wheel:
         self.radius = rad
         self.ratio = ratio
 
+        self.circ = 2 * pi * rad
+        self.mm_to_deg = 1 / self.circ * 360 # To translate from  mm -> deg
+
+        self.zero_speed = 4
+        self.min_speed = 30
+
+    def run(self, speed):
+        if abs(speed) <= self.zero_speed:
+            speed = 0
+        elif abs(speed) <= self.min_speed:
+            speed = self.min_speed
+
+        Motor.run(self.motor, speed * self.mm_to_deg * self.ratio)
+
+    def stop(self):
+        Motor.brake(self.motor)
+
+    def get_dist(self):
+        angle = Motor.angle(self.motor) / self.mm_to_deg / self.ratio
+        return angle
+    
+    def reset(self):
+        Motor.reset_angle(self.motor, 0)
+
 
 class Robot:
     def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axel_len: int, direction: Direction = Direction.FORWARD):
@@ -101,3 +127,22 @@ class Robot:
         self.right_wheel.ratio * direction
 
         self.axel_len = axel_len
+
+        self.default_gyro = 0
+
+    def stop(self):
+        self.left_wheel.stop()
+        self.right_wheel.stop()
+
+    def angle(self):
+        angle = self.hub.imu.heading()
+        angle -= self.default_gyro
+        return angle
+    
+    def reset_angle(self):
+        self.hub.imu.reset_heading(0)
+
+    def wait_for_button(self):
+        while not self.hub.buttons.pressed():
+            sleep_ms(50)
+        sleep_ms(300)
