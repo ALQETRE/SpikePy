@@ -18,3 +18,4 @@
 # Testing:
 - Try to use avg time between two speeds instead of the max
 - Play with dec bias
+- constant dt vs dt in ms
