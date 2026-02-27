@@ -2,23 +2,32 @@ from pybricks.hubs import PrimeHub
 from pybricks.pupdevices import Motor, ColorSensor
 
 from pybricks.parameters import Axis, Color, Button, Port
+from pybricks.tools import wait
 
-from enum import Enum
 from math import pi
-from time import sleep_ms, ticks_us
+from enum import Enum
+from time import time
 
-
-hub = PrimeHub()
 
 class Direction(Enum):
     FORWARD = 1,
+    """A positive speed value should make the motor move forward."""
+
     BACKWARD = -1,
+    """A positive speed value should make the motor move backward."""
+
     RIGHT = 1,
     LEFT = -1
 
+    CLOCKWISE: Direction = 0
+    """A positive speed value should make the motor move clockwise."""
+
+    COUNTERCLOCKWISE: Direction = 1
+    """A positive speed value should make the motor move counterclockwise."""
+
 
 class Pid:
-    def __init__(self, kp, ki, kd):
+    def __init__(self, kp: float, ki: float, kd: float):
         """
         PID controler
 
@@ -38,7 +47,7 @@ class Pid:
         self.last_error = 0
         self.total_error = 0
 
-    def calc(self, error, dt):
+    def calc(self, error: float, dt: float) -> float:
         output = 0
         output += self.kp * error
         output += self.ki * self.total_error
@@ -81,7 +90,7 @@ class Wheel:
         self.zero_speed = 4
         self.min_speed = 30
 
-    def run(self, speed):
+    def _run(self, speed):
         if abs(speed) <= self.zero_speed:
             speed = 0
         elif abs(speed) <= self.min_speed:
@@ -89,14 +98,14 @@ class Wheel:
 
         Motor.run(self.motor, speed * self.mm_to_deg * self.ratio)
 
-    def stop(self):
+    def _stop(self):
         Motor.brake(self.motor)
 
-    def get_dist(self):
+    def _get_dist(self):
         angle = Motor.angle(self.motor) / self.mm_to_deg / self.ratio
         return angle
     
-    def reset(self):
+    def _reset(self):
         Motor.reset_angle(self.motor, 0)
 
 
@@ -126,23 +135,133 @@ class Robot:
         self.left_wheel.ratio * -1 * direction # Swap direction for one wheel to drive forwards
         self.right_wheel.ratio * direction
 
-        self.axel_len = axel_len
+        self._axel_len = axel_len
 
-        self.default_gyro = 0
+        self._default_gyro = 0
+
+        self._left_speed = 0
+        self._right_speed = 0
+
+        self.move_pid = Pid(0, 0, 0)
 
     def stop(self):
-        self.left_wheel.stop()
-        self.right_wheel.stop()
+        self.left_wheel._stop
+        self.right_wheel._stop
 
     def angle(self):
         angle = self.hub.imu.heading()
-        angle -= self.default_gyro
+        angle -= self._default_gyro
         return angle
     
-    def reset_angle(self):
-        self.hub.imu.reset_heading(0)
+    def _reset_angle(self):
+        self.hub.imu._reset_heading(0)
 
     def wait_for_button(self):
         while not self.hub.buttons.pressed():
-            sleep_ms(50)
-        sleep_ms(300)
+            wait(50)
+        wait(300)
+
+    def _set_pid(self, Kp: float = None, Ki: float = None, Kd: float = None):
+        if not Kp is None:
+            self.move_pid.kp = Kp
+        if not Ki is None:
+            self.move_pid.ki = Ki
+        if not Kd is None:
+            self.move_pid.kd = Kd
+
+        # TODO: Add support for more types of pids
+
+    def _get_dist(self):
+        left_dist = self.left_wheel._get_dist()
+        right_dist = self.right_wheel._get_dist()
+
+        return (left_dist + right_dist) / 2
+    
+    def _reset_dist(self):
+        self.left_wheel._reset()
+        self.right_wheel._reset()
+    
+    def _calc_t_from_acc(self, left_speed: int, right_speed: int, acc: int):
+        left_diff = left_speed - self._left_speed
+        right_diff = right_speed - self._right_speed
+
+        t_left = abs(left_diff) / acc
+        t_right = abs(right_diff) / acc
+
+        t = max(t_left, t_right) # TODO: Try avg
+        
+        return t
+
+    def _acceleration(self, left_speed: int, right_speed: int, acc: int, dt: float):
+        left_diff = left_speed - self._left_speed
+        right_diff = right_speed - self._right_speed
+
+        t = self._calc_t_from_acc(left_speed, right_speed, acc)
+
+        if t == 0:
+            self._left_speed = left_speed
+            self._right_speed = right_speed
+            return
+
+        left_acc = left_diff / t
+        right_acc = left_diff / t
+
+        self._left_speed += left_acc * dt
+        self._right_speed += right_acc * dt
+
+        if left_diff > 0 and self._left_speed > left_speed:
+            self._left_speed = left_speed
+        elif left_diff < 0 and self._left_speed < left_speed:
+            self._left_speed = left_speed
+
+        if right_diff > 0 and self._right_speed > right_speed:
+            self._right_speed = right_speed
+        elif right_diff < 0 and self._right_speed < right_speed:
+            self._right_speed = right_speed
+
+
+    def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc= 100, stop_end= True):
+        
+        # TODO: Revert the old pid
+
+        old_pid = self.move_pid
+        if not one_time_pid is None:
+            self.move_pid = one_time_pid
+
+        self.move_pid.reset()
+
+        total_dist = 0
+        self._reset_dist()
+
+        last_time = time()
+
+        while abs(total_dist) < abs(dist):
+            now = time()
+            dt = now - last_time
+            last_time = now
+
+            self._acceleration(speed, speed, acc, dt)
+
+            angle = self.angle()
+            correction = self.move_pid.calc(-angle, dt) / 2
+
+            left_speed = self._left_speed - correction
+            right_speed = self._right_speed + correction
+
+            self.left_wheel._run(left_speed)
+            self.right_wheel._run(right_speed)
+
+            total_dist = self._get_dist()
+
+            if stop_end:
+                if speed != 0:
+                    t_to_stop = self._calc_t_from_acc(0, 0, acc)
+                    dist_to_stop = (abs(speed) * t_to_stop) / 2 - 10 # TODO: Dec bias (-10)
+                if dist_to_stop < abs(dist - total_dist):
+                    speed = 0
+
+        if stop_end:
+            self.stop()
+        
+        self.move_pid = old_pid
+
