@@ -24,6 +24,12 @@ class Direction:
     """A positive speed value should make the motor move counterclockwise."""
 
 
+class PidType:
+    MOVE = 0,
+    TURN = 1,
+    FOLLOW = 2,
+
+
 class Pid:
     def __init__(self, kp: float, ki: float, kd: float):
         """
@@ -45,7 +51,7 @@ class Pid:
         self.last_error = 0
         self.total_error = 0
 
-    def calc(self, error: float, dt: float) -> float:
+    def _calc(self, error: float, dt: float) -> float:
         if dt == 0:
             return 0
         
@@ -59,7 +65,7 @@ class Pid:
 
         return output
     
-    def reset(self):
+    def _reset(self):
         self.last_error = 0
         self.total_error = 0
 
@@ -93,7 +99,6 @@ class Wheel:
 
     def _run(self, speed):
         speed *= self.ratio * self.mm_to_deg
-        print(f"ratio: {self.ratio}")
 
         if abs(speed) <= self.zero_speed:
             speed = 0
@@ -136,8 +141,8 @@ class Robot:
         self.left_wheel = left_wheel
         self.right_wheel = right_wheel
 
-        self.left_wheel.ratio * -1 * direction # Swap direction for one wheel to drive forwards
-        self.right_wheel.ratio * direction
+        self.left_wheel.ratio *= -1 * direction # Swap direction for one wheel to drive forwards
+        self.right_wheel.ratio *= direction
 
         self._axel_len = axel_len
 
@@ -146,13 +151,17 @@ class Robot:
         self._left_speed = 0
         self._right_speed = 0
 
+        self.dec_bias = 10
+        self.move_bias = 0
+
         self.move_pid = Pid(0, 0, 0)
 
     def stop(self):
         self.left_wheel._stop
         self.right_wheel._stop
+        wait(200)
 
-    def angle(self):
+    def _angle(self):
         angle = self.hub.imu.heading()
         angle -= self._default_gyro
         return angle
@@ -165,13 +174,18 @@ class Robot:
             wait(50)
         wait(300)
 
-    def _set_pid(self, Kp: float = None, Ki: float = None, Kd: float = None):
-        if not Kp is None:
-            self.move_pid.kp = Kp
-        if not Ki is None:
-            self.move_pid.ki = Ki
-        if not Kd is None:
-            self.move_pid.kd = Kd
+    def set_pid(self, pid_type: PidType, Kp: float = None, Ki: float = None, Kd: float = None):
+        if pid_type == PidType.MOVE:
+            if not Kp is None:
+                self.move_pid.kp = Kp
+            if not Ki is None:
+                self.move_pid.ki = Ki
+            if not Kd is None:
+                self.move_pid.kd = Kd
+        elif pid_type == PidType.TURN:
+            pass
+        elif pid_type == PidType.FOLLOW:
+            pass
 
         # TODO: Add support for more types of pids
 
@@ -201,7 +215,6 @@ class Robot:
         right_diff = right_speed - self._right_speed
 
         t = self._calc_t_from_acc(left_speed, right_speed, acc)
-
         if t == 0:
             self._left_speed = left_speed
             self._right_speed = right_speed
@@ -210,7 +223,6 @@ class Robot:
         left_acc = left_diff / t
         right_acc = left_diff / t
 
-        print(f"Left acc: {left_acc}")
 
         self._left_speed += left_acc * dt
         self._right_speed += right_acc * dt
@@ -228,30 +240,31 @@ class Robot:
 
     def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc= 300, stop_end= True):
         
-        # TODO: Revert the old pid
-
         old_pid = self.move_pid
         if not one_time_pid is None:
             self.move_pid = one_time_pid
 
-        self.move_pid.reset()
+        t_to_stop = self._calc_t_from_acc(0, 0, acc)
+        dist_to_stop = (abs(speed) * t_to_stop) / 2 - self.dec_bias
+
+        true_dist = abs(dist) - self.move_bias
+
+        self.move_pid._reset()
 
         total_dist = 0
         self._reset_dist()
 
         stopwatch = StopWatch()
 
-        while abs(total_dist) < abs(dist):
+        while abs(total_dist) < true_dist:
 
             dt = stopwatch.time() / 1000
             stopwatch.reset()
 
-            print(f"dt: {dt}")
-
             self._acceleration(speed, speed, acc, dt)
 
-            angle = self.angle()
-            correction = self.move_pid.calc(-angle, dt) / 2
+            angle = self._angle()
+            correction = self.move_pid._calc(-angle, dt) / 2
 
             left_speed = self._left_speed - correction
             right_speed = self._right_speed + correction
@@ -261,13 +274,8 @@ class Robot:
 
             total_dist = self._get_dist()
 
-            if stop_end:
-                if speed != 0:
-                    t_to_stop = self._calc_t_from_acc(0, 0, acc)
-                    dist_to_stop = (abs(speed) * t_to_stop) / 2 - 10 # TODO: Dec bias (-10)
-                if dist_to_stop > abs(dist - total_dist):
-                    speed = 0
-            print(f"Speed: {speed}")
+            if stop_end and dist_to_stop > abs(dist - total_dist):
+                speed = 0
 
         if stop_end:
             self.stop()
