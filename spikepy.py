@@ -2,14 +2,12 @@ from pybricks.hubs import PrimeHub
 from pybricks.pupdevices import Motor, ColorSensor
 
 from pybricks.parameters import Axis, Color, Button, Port
-from pybricks.tools import wait
-
-from math import pi
-from enum import Enum
-from time import time
+from pybricks.tools import wait, StopWatch
 
 
-class Direction(Enum):
+PI = 3.14159
+
+class Direction:
     FORWARD = 1,
     """A positive speed value should make the motor move forward."""
 
@@ -19,10 +17,10 @@ class Direction(Enum):
     RIGHT = 1,
     LEFT = -1
 
-    CLOCKWISE: Direction = 0
+    CLOCKWISE = 0
     """A positive speed value should make the motor move clockwise."""
 
-    COUNTERCLOCKWISE: Direction = 1
+    COUNTERCLOCKWISE = 1
     """A positive speed value should make the motor move counterclockwise."""
 
 
@@ -48,6 +46,9 @@ class Pid:
         self.total_error = 0
 
     def calc(self, error: float, dt: float) -> float:
+        if dt == 0:
+            return 0
+        
         output = 0
         output += self.kp * error
         output += self.ki * self.total_error
@@ -84,19 +85,22 @@ class Wheel:
         self.radius = rad
         self.ratio = ratio
 
-        self.circ = 2 * pi * rad
+        self.circ = 2 * PI * rad
         self.mm_to_deg = 1 / self.circ * 360 # To translate from  mm -> deg
 
-        self.zero_speed = 4
-        self.min_speed = 30
+        self.zero_speed = 25
+        self.min_speed = 70
 
     def _run(self, speed):
+        speed *= self.ratio * self.mm_to_deg
+        print(f"ratio: {self.ratio}")
+
         if abs(speed) <= self.zero_speed:
             speed = 0
         elif abs(speed) <= self.min_speed:
             speed = self.min_speed
 
-        Motor.run(self.motor, speed * self.mm_to_deg * self.ratio)
+        Motor.run(self.motor, speed)
 
     def _stop(self):
         Motor.brake(self.motor)
@@ -206,6 +210,8 @@ class Robot:
         left_acc = left_diff / t
         right_acc = left_diff / t
 
+        print(f"Left acc: {left_acc}")
+
         self._left_speed += left_acc * dt
         self._right_speed += right_acc * dt
 
@@ -220,7 +226,7 @@ class Robot:
             self._right_speed = right_speed
 
 
-    def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc= 100, stop_end= True):
+    def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc= 300, stop_end= True):
         
         # TODO: Revert the old pid
 
@@ -233,12 +239,14 @@ class Robot:
         total_dist = 0
         self._reset_dist()
 
-        last_time = time()
+        stopwatch = StopWatch()
 
         while abs(total_dist) < abs(dist):
-            now = time()
-            dt = now - last_time
-            last_time = now
+
+            dt = stopwatch.time() / 1000
+            stopwatch.reset()
+
+            print(f"dt: {dt}")
 
             self._acceleration(speed, speed, acc, dt)
 
@@ -257,8 +265,9 @@ class Robot:
                 if speed != 0:
                     t_to_stop = self._calc_t_from_acc(0, 0, acc)
                     dist_to_stop = (abs(speed) * t_to_stop) / 2 - 10 # TODO: Dec bias (-10)
-                if dist_to_stop < abs(dist - total_dist):
+                if dist_to_stop > abs(dist - total_dist):
                     speed = 0
+            print(f"Speed: {speed}")
 
         if stop_end:
             self.stop()

@@ -3,10 +3,10 @@ from spikepy import *
 hub = PrimeHub()
 
 left_port = Port.A
-right_port = Port.B
+right_port = Port.E
 
 wheel_rad = 29
-axel_len = 135
+axel_len = 96
 
 left_wheel = Wheel(left_port, wheel_rad)
 right_wheel = Wheel(right_port, wheel_rad)
