@@ -26,8 +26,13 @@ class Direction:
 
 class PidType:
     MOVE = 0,
+    """Move PID - used for keeping the robot facing forward in a straight line, when using ```move(...)```."""
+
     TURN = 1,
+    """Turn PID - used for keeping the robot facing along the arc, when using ```turn(...)```."""
+
     FOLLOW = 2,
+    """Follow PID - used for keeping the robot following the target function, when using ```follow(...)```."""
 
 
 class Pid:
@@ -157,6 +162,10 @@ class Robot:
         self.move_pid = Pid(0, 0, 0)
 
     def stop(self):
+        """
+        Breaks the motors and stops the robot.
+        """
+
         self.left_wheel._stop
         self.right_wheel._stop
         wait(200)
@@ -170,11 +179,30 @@ class Robot:
         self.hub.imu._reset_heading(0)
 
     def wait_for_button(self):
+        """
+        Waits for any side button to be pressed.
+        """
+
         while not self.hub.buttons.pressed():
             wait(50)
         wait(300)
 
     def set_pid(self, pid_type: PidType, Kp: float = None, Ki: float = None, Kd: float = None):
+        """
+        Sets any pid inside the robot for more precise movement execution.
+
+        Arguments:
+            pid_type (PidType):
+                What pid to edit.
+            Kp (float, optional):
+                The new proportional term, if ```None``` then will be left unchanged.
+            Ki (float, optional):
+                The new integral term, if ```None``` then will be left unchanged.
+            Kd (float, optional):
+                The new derivative term, if ```None``` then will be left unchanged.
+        """
+
+
         if pid_type == PidType.MOVE:
             if not Kp is None:
                 self.move_pid.kp = Kp
@@ -238,7 +266,22 @@ class Robot:
             self._right_speed = right_speed
 
 
-    def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc= 300, stop_end= True):
+    def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc: int = 300, stop_end: bool = True):
+        """
+        Moves the robot in a straight line for a set distance in mm with a predefined speed and acceleration.
+
+        Arguments:
+            speed (int):
+                Max speed of the robot during the motion in mm/s.
+            dist (int):
+                The distance to travel in mm.
+            one_time_pid (Pid, optional):
+                If a pid object is given it will be used as the PidType.MOVE for this single motion.
+            acc (int, optional):
+                The acceleration and deceleration in mm/s^2.
+            stop_end (bool, optional):
+                If true at the end of the movemnt it will slow down and stop.
+        """
         
         old_pid = self.move_pid
         if not one_time_pid is None:

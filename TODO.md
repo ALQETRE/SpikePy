@@ -2,7 +2,6 @@
 
 ### Priority:
 - turn()
-- Doc strs
 
 ### Later priority:
 - follow_line()
