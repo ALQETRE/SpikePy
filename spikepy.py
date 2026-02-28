@@ -168,8 +168,8 @@ class Robot:
         Breaks the motors and stops the robot.
         """
 
-        self.left_wheel._stop
-        self.right_wheel._stop
+        self.left_wheel._stop()
+        self.right_wheel._stop()
         wait(200)
 
     def _angle(self):
@@ -368,7 +368,7 @@ class Robot:
                 org_left_speed = -speed
                 org_right_speed = speed
 
-        big_total_dist = big_rad * PI/180 * angle
+        big_total_dist = abs(big_rad * PI/180 * angle)
             
         self.turn_pid._reset()
 
@@ -387,13 +387,13 @@ class Robot:
             angle_traveled = self._angle()
 
             if angle > 0:
-                angle_calculated = (self.left_wheel._get_dist()/big_total_dist) * angle
+                angle_calculated = abs(self.left_wheel._get_dist()/big_total_dist) * angle
             else:
-                angle_calculated = (self.right_wheel._get_dist()/big_total_dist) * angle
+                angle_calculated = abs(self.right_wheel._get_dist()/big_total_dist) * angle
 
             error = angle_calculated - angle_traveled
 
-            correction = self.move_pid._calc(error, dt) / 2
+            correction = self.turn_pid._calc(error, dt) / 2
 
             left_speed = self._left_speed - correction
             right_speed = self._right_speed + correction
@@ -406,15 +406,15 @@ class Robot:
             if stop_end:
                 t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
                 dist_to_stop = (abs(speed) * t_to_stop) / 2 - self.dec_bias
-                if angle > 0 and dist_to_stop > abs(big_total_dist - self.left_wheel._get_dist()):
+                if angle > 0 and dist_to_stop > big_total_dist - abs(self.left_wheel._get_dist()):
                     speed = 0
-                elif angle < 0 and dist_to_stop > abs(big_total_dist - self.right_wheel._get_dist()):
+                elif angle < 0 and dist_to_stop > big_total_dist - abs(self.right_wheel._get_dist()):
                     speed = 0
 
 
         if stop_end:
             self.stop()
         
-        self.move_pid = old_pid
+        self.turn_pid = old_pid
 
         self._default_gyro += angle
