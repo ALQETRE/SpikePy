@@ -8,13 +8,13 @@ from pybricks.tools import wait, StopWatch
 PI = 3.14159
 
 class Direction:
-    FORWARD = 1,
+    FORWARD = 1
     """A positive speed value should make the motor move forward."""
 
-    BACKWARD = -1,
+    BACKWARD = -1
     """A positive speed value should make the motor move backward."""
 
-    RIGHT = 1,
+    RIGHT = 1
     LEFT = -1
 
     CLOCKWISE = 0
@@ -25,13 +25,13 @@ class Direction:
 
 
 class PidType:
-    MOVE = 0,
+    MOVE = 0
     """Move PID - used for keeping the robot facing forward in a straight line, when using ```move(...)```."""
 
-    TURN = 1,
+    TURN = 1
     """Turn PID - used for keeping the robot facing along the arc, when using ```turn(...)```."""
 
-    FOLLOW = 2,
+    FOLLOW = 2
     """Follow PID - used for keeping the robot following the target function, when using ```follow(...)```."""
 
 
@@ -158,7 +158,7 @@ class Robot:
 
         self.dec_bias = 10
         self.move_bias = 0
-        self.move_bias = 0
+        self.turn_bias = 0
 
         self.move_pid = Pid(0, 0, 0)
         self.turn_pid = Pid(0, 0, 0)
@@ -248,7 +248,7 @@ class Robot:
             return
 
         left_acc = left_diff / t
-        right_acc = left_diff / t
+        right_acc = right_diff / t
 
 
         self._left_speed += left_acc * dt
@@ -364,7 +364,11 @@ class Robot:
             if angle > 0:
                 org_left_speed = speed
                 org_right_speed = -speed
+            else:
+                org_left_speed = -speed
+                org_right_speed = speed
 
+        big_total_dist = big_rad * PI/180 * angle
             
         self.turn_pid._reset()
 
@@ -381,7 +385,13 @@ class Robot:
             self._acceleration(org_left_speed, org_right_speed, acc, dt)
 
             angle_traveled = self._angle()
-            error = -angle_traveled
+
+            if angle > 0:
+                angle_calculated = (self.left_wheel._get_dist()/big_total_dist) * angle
+            else:
+                angle_calculated = (self.right_wheel._get_dist()/big_total_dist) * angle
+
+            error = angle_calculated - angle_traveled
 
             correction = self.move_pid._calc(error, dt) / 2
 
@@ -396,9 +406,9 @@ class Robot:
             if stop_end:
                 t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
                 dist_to_stop = (abs(speed) * t_to_stop) / 2 - self.dec_bias
-                if angle > 0 and dist_to_stop > abs((big_rad*PI*2) - self.left_wheel._get_dist()):
+                if angle > 0 and dist_to_stop > abs(big_total_dist - self.left_wheel._get_dist()):
                     speed = 0
-                elif angle < 0 and dist_to_stop > abs((big_rad*PI*2) - self.right_wheel._get_dist()):
+                elif angle < 0 and dist_to_stop > abs(big_total_dist - self.right_wheel._get_dist()):
                     speed = 0
 
 
