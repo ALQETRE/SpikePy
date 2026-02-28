@@ -119,8 +119,8 @@ class Wheel:
         Motor.brake(self.motor)
 
     def _get_dist(self):
-        angle = Motor.angle(self.motor) / self.mm_to_deg / self.ratio
-        return angle
+        dist = Motor.angle(self.motor) / self.mm_to_deg / self.ratio
+        return dist
     
     def _reset(self):
         Motor.reset_angle(self.motor, 0)
@@ -180,7 +180,11 @@ class Robot:
         angle -= self._default_gyro
         return angle
     
-    def _reset_angle(self):
+    def reset_angle(self):
+        """
+        Resets the gyro to 0°
+        """
+        
         self.hub.imu.reset_heading(0)
 
     def wait_for_button(self):
@@ -401,10 +405,10 @@ class Robot:
 
             error = angle_calculated - angle_traveled
 
-            correction = self.turn_pid._calc(error, dt) / 2
+            correction = self.turn_pid._calc(error, dt) * self._axel_len
 
-            left_speed = self._left_speed - correction
-            right_speed = self._right_speed + correction
+            left_speed = self._left_speed - (correction * (self._left_speed / (self._left_speed + self._right_speed)))
+            right_speed = self._right_speed + (correction * (self._right_speed / (self._left_speed + self._right_speed)))
 
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
