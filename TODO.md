@@ -1,7 +1,6 @@
 # Code:
 
 ### Priority:
-- turn()
 
 ### Later priority:
 - follow_line()

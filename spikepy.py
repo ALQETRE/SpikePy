@@ -158,8 +158,10 @@ class Robot:
 
         self.dec_bias = 10
         self.move_bias = 0
+        self.move_bias = 0
 
         self.move_pid = Pid(0, 0, 0)
+        self.turn_pid = Pid(0, 0, 0)
 
     def stop(self):
         """
@@ -227,10 +229,7 @@ class Robot:
         self.left_wheel._reset()
         self.right_wheel._reset()
     
-    def _calc_t_from_acc(self, left_speed: int, right_speed: int, acc: int):
-        left_diff = left_speed - self._left_speed
-        right_diff = right_speed - self._right_speed
-
+    def _calc_t_from_acc(self, left_diff: int, right_diff: int, acc: int):
         t_left = abs(left_diff) / acc
         t_right = abs(right_diff) / acc
 
@@ -242,7 +241,7 @@ class Robot:
         left_diff = left_speed - self._left_speed
         right_diff = right_speed - self._right_speed
 
-        t = self._calc_t_from_acc(left_speed, right_speed, acc)
+        t = self._calc_t_from_acc(left_diff, right_diff, acc)
         if t == 0:
             self._left_speed = left_speed
             self._right_speed = right_speed
@@ -266,7 +265,7 @@ class Robot:
             self._right_speed = right_speed
 
 
-    def move(self, speed: int, dist: int, one_time_pid: Pid = None, acc: int = 300, stop_end: bool = True):
+    def move(self, speed: int, dist: int, acc: int = 300, stop_end: bool = True, one_time_pid: Pid = None):
         """
         Moves the robot in a straight line for a set distance in mm with a predefined speed and acceleration.
 
@@ -287,19 +286,16 @@ class Robot:
         if not one_time_pid is None:
             self.move_pid = one_time_pid
 
-        t_to_stop = self._calc_t_from_acc(0, 0, acc)
-        dist_to_stop = (abs(speed) * t_to_stop) / 2 - self.dec_bias
-
         true_dist = abs(dist) - self.move_bias
 
         self.move_pid._reset()
 
-        total_dist = 0
+        dist_traveled = 0
         self._reset_dist()
 
         stopwatch = StopWatch()
 
-        while abs(total_dist) < true_dist:
+        while abs(dist_traveled) < true_dist:
 
             dt = stopwatch.time() / 1000
             stopwatch.reset()
@@ -307,7 +303,7 @@ class Robot:
             self._acceleration(speed, speed, acc, dt)
 
             angle = self._angle()
-            correction = self.move_pid._calc(-angle, dt) / 2
+            correction = self.move_pid._calc(-angle, dt) * self._axel_len / 2
 
             left_speed = self._left_speed - correction
             right_speed = self._right_speed + correction
@@ -315,13 +311,100 @@ class Robot:
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
-            total_dist = self._get_dist()
+            dist_traveled = self._get_dist()
 
-            if stop_end and dist_to_stop > abs(dist - total_dist):
-                speed = 0
+            if stop_end:
+                t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
+                dist_to_stop = (abs(speed) * t_to_stop) / 2 - self.dec_bias
+                if dist_to_stop > abs(dist - dist_traveled):
+                    speed = 0
 
         if stop_end:
             self.stop()
         
         self.move_pid = old_pid
 
+    def turn(self, speed: int, angle: int, radius: int = 0, acc:int = 300, stop_end: bool = True, one_time_pid: Pid = None):
+        """
+        Moves the robot in a straight line for a set distance in mm with a predefined speed and acceleration.
+
+        Arguments:
+            speed (int):
+                Max speed of the robot during the motion in mm/s.
+            dist (int):
+                The distance to travel in mm.
+            one_time_pid (Pid, optional):
+                If a pid object is given it will be used as the PidType.MOVE for this single motion.
+            acc (int, optional):
+                The acceleration and deceleration in mm/s^2.
+            stop_end (bool, optional):
+                If true at the end of the movemnt it will slow down and stop.
+        """
+        
+        old_pid = self.turn_pid
+        if not one_time_pid is None:
+            self.turn_pid = one_time_pid
+
+        true_angle = abs(angle) - self.turn_bias
+
+        left_speed = 0
+        right_speed = 0
+
+        small_rad = abs(radius) - (self._axel_len / 2)
+        big_rad = abs(radius) + (self._axel_len / 2)
+
+        if radius != 0:
+            if angle > 0:
+                org_left_speed = speed * (1 if radius > 0 else -1)
+                org_right_speed = speed * (small_rad / big_rad) * (1 if radius > 0 else -1)
+            else:
+                org_left_speed = speed * (small_rad / big_rad) * (1 if radius > 0 else -1)
+                org_right_speed = speed * (1 if radius > 0 else -1)
+        else:
+            if angle > 0:
+                org_left_speed = speed
+                org_right_speed = -speed
+
+            
+        self.turn_pid._reset()
+
+        angle_traveled = 0
+        self._reset_dist()
+
+        stopwatch = StopWatch()
+
+        while abs(angle_traveled) < true_angle:
+
+            dt = stopwatch.time() / 1000
+            stopwatch.reset()
+
+            self._acceleration(org_left_speed, org_right_speed, acc, dt)
+
+            angle_traveled = self._angle()
+            error = -angle_traveled
+
+            correction = self.move_pid._calc(error, dt) / 2
+
+            left_speed = self._left_speed - correction
+            right_speed = self._right_speed + correction
+
+            self.left_wheel._run(left_speed)
+            self.right_wheel._run(right_speed)
+
+            angle_traveled = self._angle()
+
+            if stop_end:
+                t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
+                dist_to_stop = (abs(speed) * t_to_stop) / 2 - self.dec_bias
+                if angle > 0 and dist_to_stop > abs((big_rad*PI*2) - self.left_wheel._get_dist()):
+                    speed = 0
+                elif angle < 0 and dist_to_stop > abs((big_rad*PI*2) - self.right_wheel._get_dist()):
+                    speed = 0
+
+
+        if stop_end:
+            self.stop()
+        
+        self.move_pid = old_pid
+
+        self._default_gyro += angle
