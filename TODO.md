@@ -7,7 +7,6 @@
 - follow_line()
 - until implementation
 - align()
-- default pids to use for move and turn
 - Documentation
 
 ### Nice to have:
