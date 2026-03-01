@@ -2,6 +2,7 @@
 
 ### Priority:
 - test turn()
+- friction support
 
 ### Later priority:
 - follow_line()

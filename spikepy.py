@@ -112,17 +112,17 @@ class Wheel:
         elif abs(speed) <= self.min_speed:
             speed = self.min_speed
 
-        Motor.run(self.motor, speed)
+        self.motor.run(speed)
 
     def _stop(self):
-        Motor.brake(self.motor)
+        self.motor.brake()
 
     def _get_dist(self):
-        dist = Motor.angle(self.motor) / self.mm_to_deg / self.ratio
+        dist = self.motor.angle() / self.mm_to_deg / self.ratio
         return dist
     
     def _reset(self):
-        Motor.reset_angle(self.motor, 0)
+        self.motor.reset_angle(0)
 
 
 class Robot:
