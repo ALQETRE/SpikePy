@@ -53,29 +53,31 @@ class Pid:
         self.ki = ki
         self.kd = kd
 
-        self.last_error = 0
-        self.total_error = 0
+        self.max_total_error = 100
+
+        self._last_error = 0
+        self._total_error = 0
 
     def _calc(self, error: float, dt: float) -> float:
         if dt == 0:
             return 0
-        
-
-        print(error)
-        
+                
         output = 0
         output += self.kp * error
-        output += self.ki * self.total_error
-        output += self.kd * (error - self.last_error) / dt
+        output += self.ki * self._total_error
+        output += self.kd * (error - self._last_error) / dt
 
-        self.last_error = error
-        self.total_error += error * dt
+        self._last_error = error
+        self._total_error += error * dt
+
+        if abs(self._total_error) > self.max_total_error:
+            self._total_error = self.max_total_error * (1 if self._total_error > 0 else -1)
 
         return output
     
-    def _reset(self):
-        self.last_error = 0
-        self.total_error = 0
+    def _reset(self, error= 0):
+        self._last_error = error
+        self._total_error = 0
 
 class Wheel:
     def __init__(self, port: Port, rad: int, ratio: float = 1):
@@ -162,6 +164,11 @@ class Robot:
         self.move_bias = 0
         self.turn_bias = 0
 
+        self.slip_threashold = 5
+        self.slip_acc = 0.2
+
+        self._slip = 1
+
         self.move_pid = Pid(0.1, 0, 0.1)
         self.turn_pid = Pid(0.1, 0, 0.1)
 
@@ -178,6 +185,10 @@ class Robot:
         angle = self.hub.imu.heading()
         angle -= self._default_gyro
         return angle
+    
+    def _angular_vel(self):
+        angular_vel = self.hub.imu.angular_velocity(Axis.Z)
+        return angular_vel
     
     def reset_angle(self):
         """
@@ -278,6 +289,27 @@ class Robot:
         clamped_angle = radians(max(abs(error), 90))
         scale = degrees(cos(clamped_angle))
         return scale
+    
+    def _slip_correction(self, left: int, right: int, dt: float) -> tuple:
+        angular_vel_calc = degrees((left - right) / self._axel_len * self._slip)
+        angular_vel_musured = self._angular_vel()
+
+        diff = abs(angular_vel_calc - angular_vel_musured)
+
+        if diff > self.slip_threashold:
+            self._slip -= self.slip_acc * dt
+            if self._slip < 0:
+                self._slip = 0
+        else:
+            self._slip += self.slip_acc * dt
+            if self._slip > 1:
+                self._slip = 1
+        
+        return left * self._slip, right * self._slip
+
+    def _reset_slip(self):
+        self._slip = 1
+
 
 
     def move(self, speed: int, dist: int, acc: int = 300, stop_end: bool = True, one_time_pid: Pid = None):
@@ -303,9 +335,10 @@ class Robot:
 
         true_dist = abs(dist) - self.move_bias
 
-        self.move_pid._reset()
+        self.move_pid._reset(-self._angle())
 
         dist_traveled = 0
+        self._reset_slip()
         self._reset_dist()
 
         stopwatch = StopWatch()
@@ -320,10 +353,10 @@ class Robot:
             angle = self._angle()
             correction = self.move_pid._calc(-angle, dt) * self._axel_len / 2
 
-            print(f"Correnction: {correction}")
-
             left_speed = (self._left_speed * self._speed_scale(-angle)) + correction
             right_speed = (self._right_speed * self._speed_scale(-angle)) - correction
+
+            left_speed, right_speed = self._slip_correction(left_speed, right_speed, dt)
 
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
@@ -387,9 +420,10 @@ class Robot:
 
         big_total_dist = abs(big_rad * pi/180 * angle)
             
-        self.turn_pid._reset()
+        self.turn_pid._reset(-self._angle())
 
         angle_traveled = 0
+        self._reset_slip()
         self._reset_dist()
 
         stopwatch = StopWatch()
@@ -412,8 +446,13 @@ class Robot:
 
             correction = self.turn_pid._calc(error, dt) * self._axel_len
 
-            left_speed = (self._left_speed * self._speed_scale(error)) + (correction * (self._left_speed / (self._left_speed + self._right_speed)))
-            right_speed = (self._right_speed * self._speed_scale(error)) - (correction * (self._right_speed / (self._left_speed + self._right_speed)))
+            correction_scale_left = org_left_speed / (abs(org_left_speed) + abs(org_right_speed))
+            correction_scale_right = org_right_speed / (abs(org_left_speed) + abs(org_right_speed))
+
+            left_speed = (self._left_speed * self._speed_scale(error)) + (correction * correction_scale_left)
+            right_speed = (self._right_speed * self._speed_scale(error)) - (correction * correction_scale_right)
+
+            left_speed, right_speed = self._slip_correction(left_speed, right_speed, dt)
 
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)

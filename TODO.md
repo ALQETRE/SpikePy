@@ -3,7 +3,7 @@
 ### Priority:
 - test turn()
 - friction support
-- add slip prevention with angular_velocity difference
+- add direction to turn instead of raduis sing
 
 ### Later priority:
 - follow_line()
