@@ -2,6 +2,7 @@
 
 ### Priority:
 - test turn()
+- add slip prevention with angular_velocity difference
 
 ### Later priority:
 - follow_line()
