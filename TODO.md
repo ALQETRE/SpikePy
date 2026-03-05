@@ -2,13 +2,13 @@
 
 ### Priority:
 - test turn()
+- friction support
 - add slip prevention with angular_velocity difference
 
 ### Later priority:
 - follow_line()
 - until implementation
 - align()
-- default pids to use for move and turn
 - Documentation
 
 ### Nice to have:
