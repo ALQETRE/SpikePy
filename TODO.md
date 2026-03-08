@@ -3,7 +3,6 @@
 ### Priority:
 - test turn()
 - friction support
-- add linear slipage correction
 - check sign and axis on the _angular_vel() and _linear_acc()
 
 ### Later priority:
