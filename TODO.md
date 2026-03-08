@@ -4,6 +4,8 @@
 - test turn()
 - friction support
 - add direction to turn instead of raduis sing
+- remove proportional pid correction just +- correction
+- add linear slipage correction
 
 ### Later priority:
 - follow_line()
