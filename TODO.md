@@ -3,9 +3,8 @@
 ### Priority:
 - test turn()
 - friction support
-- add direction to turn instead of raduis sing
-- remove proportional pid correction just +- correction
 - add linear slipage correction
+- check sign and axis on the _angular_vel() and _linear_acc()
 
 ### Later priority:
 - follow_line()
