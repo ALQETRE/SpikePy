@@ -160,12 +160,12 @@ class Robot:
         self._left_speed = 0
         self._right_speed = 0
 
-        self.dec_bias = 5
+        self.dec_bias = 0
         self.move_bias = 0
         self.turn_bias = 0
 
         self.angular_slip_threshold = 5
-        self.linear_slip_threshold = 10
+        self.linear_slip_threshold = 2
         self.slip_acc = 0.2
 
         self._slip = 1
@@ -192,7 +192,7 @@ class Robot:
         return angular_vel
 
     def _linear_acc(self):
-        linear_acc = self.hub.imu.acceleration(Axis.Y) * 1000
+        linear_acc = self.hub.imu.acceleration(Axis.Y)
         return linear_acc
 
     def reset_angle(self):
@@ -299,7 +299,7 @@ class Robot:
         return (acc if accelerating else 0) * (1 if (left_diff + right_diff) > 0 else -1)
 
     def _speed_scale(self, error: float) -> float:
-        clamped_angle = radians(max(abs(error), 90))
+        clamped_angle = radians(min(abs(error), 90))
         scale = degrees(cos(clamped_angle))
         return scale
     
@@ -372,6 +372,10 @@ class Robot:
             angle = self._angle()
             correction = self.move_pid._calc(-angle, dt) * self._axel_len / 2
 
+            # print(f"Angle: {angle}")
+            # print(f"Correction: {correction}")
+            # print(f"Speed scale: {self._speed_scale(-angle)}")
+
             left_speed = (self._left_speed * self._speed_scale(-angle)) + correction
             right_speed = (self._right_speed * self._speed_scale(-angle)) - correction
 
@@ -385,6 +389,7 @@ class Robot:
             if stop_end:
                 t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
                 dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2 - self.dec_bias
+                print(dist_to_stop)
                 if dist_to_stop > abs(dist - dist_traveled):
                     speed = 0
 

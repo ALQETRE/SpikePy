@@ -4,6 +4,7 @@
 - test turn()
 - friction support
 - check sign and axis on the _angular_vel() and _linear_acc()
+- dist to stop goes to 19 and the instant end 0 -> 20 -> 19 Done
 
 ### Later priority:
 - follow_line()
