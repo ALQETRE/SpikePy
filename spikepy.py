@@ -160,12 +160,12 @@ class Robot:
         self._left_speed = 0
         self._right_speed = 0
 
-        self.dec_bias = 0
+        self.dec_bias = 10 # [mm]
         self.move_bias = 0
         self.turn_bias = 0
 
         self.angular_slip_threshold = 5
-        self.linear_slip_threshold = 2
+        self.linear_slip_threshold = 5
         self.slip_acc = 0.2
 
         self._slip = 1
@@ -300,7 +300,7 @@ class Robot:
 
     def _speed_scale(self, error: float) -> float:
         clamped_angle = radians(min(abs(error), 90))
-        scale = degrees(cos(clamped_angle))
+        scale = cos(clamped_angle)
         return scale
     
     def _slip_correction(self, left: int, right: int, acc: int, dt: float) -> tuple:
@@ -319,6 +319,7 @@ class Robot:
             self._slip -= self.slip_acc * dt
             if self._slip < 0:
                 self._slip = 0
+            print("SLIP")
         else:
             self._slip += self.slip_acc * dt
             if self._slip > 1:
@@ -389,7 +390,7 @@ class Robot:
             if stop_end:
                 t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
                 dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2 - self.dec_bias
-                print(dist_to_stop)
+
                 if dist_to_stop > abs(dist - dist_traveled):
                     speed = 0
 
