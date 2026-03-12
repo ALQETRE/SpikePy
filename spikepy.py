@@ -153,6 +153,8 @@ class Robot:
         self.left_wheel.ratio *= -1 * direction # Swap direction for one wheel to drive forwards
         self.right_wheel.ratio *= direction
 
+        self.dir = direction
+
         self._axel_len = axel_len
 
         self._default_gyro = 0
@@ -192,7 +194,7 @@ class Robot:
         return angular_vel
 
     def _linear_acc(self):
-        linear_acc = self.hub.imu.acceleration(Axis.Y)
+        linear_acc = -self.hub.imu.acceleration(Axis.Y) * self.dir
         return linear_acc
 
     def reset_angle(self):
@@ -315,11 +317,12 @@ class Robot:
             self._slip -= self.slip_acc * dt
             if self._slip < 0:
                 self._slip = 0
+            print("SLIP A")
         elif linear_acc_diff > self.linear_slip_threshold:
             self._slip -= self.slip_acc * dt
             if self._slip < 0:
                 self._slip = 0
-            print("SLIP")
+            print("SLIP L")
         else:
             self._slip += self.slip_acc * dt
             if self._slip > 1:
