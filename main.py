@@ -19,8 +19,17 @@ right_wheel = Wheel(right_port, wheel_rad)
 
 bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
+bot.move_pid = Pid(11, 2, 9)
+# bot.move_pid = Pid(8, 2, 9)
+
+# bot.turn_pid = Pid(0, 0, 0)
+bot.turn_pid = Pid(3, 1, 3)
+
+
 bot.reset_angle()
-# bot.turn(300, 90, 48)
-bot.move(300, 1000, stop_end= True, acc= 500)
+# bot._default_gyro = 80
+
+bot.move(480, 200, stop_end= False)
+bot.turn(400, 90, 300, acc= 800)
 
 print("Done")
