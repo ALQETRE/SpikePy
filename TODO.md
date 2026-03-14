@@ -9,6 +9,7 @@
 - until implementation
 - align()
 - Documentation
+- battery checker
 
 ### Nice to have:
 - actuator support
