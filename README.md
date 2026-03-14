@@ -4,7 +4,7 @@ SpikePy is a robotics library made for PyBricks with the Spike Prime hub adding 
 
 <br>
 
-This **Documentation** serves as a step by step guide on how to use SpikePy while explaining everithing along the way. If you want more direct Documentation click [here](Documentation.md).
+This **Documentation** serves as a step by step guide on how to use SpikePy while explaining everithing along the way. If you want more direct or can't find something in this Documentation click [here](Documentation.md).
 
 ### [[Advanced Documentation]](Documentation.md)
 

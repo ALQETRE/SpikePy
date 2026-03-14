@@ -348,12 +348,12 @@ class Robot:
                 Max speed of the robot during the motion in mm/s.
             dist (int):
                 The distance to travel in mm.
-            one_time_pid (Pid, optional):
-                If a pid object is given it will be used as the PidType.MOVE for this single motion.
             acc (int, optional):
                 The acceleration and deceleration in mm/s^2.
             stop_end (bool, optional):
                 If true at the end of the movemnt it will slow down and stop.
+            one_time_pid (Pid, optional):
+                If a pid object is given it will be used as the PidType.MOVE for this single motion.
         """
         
         old_pid = self.move_pid
@@ -411,19 +411,23 @@ class Robot:
 
     def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc:int = 800, stop_end: bool = True, one_time_pid: Pid = None):
         """
-        Moves the robot in a straight line for a set distance in mm with a predefined speed and acceleration.
+        Turns the robot along an arc with a set angle in degress (°) and radius in mm with a predefined speed and acceleration.
 
         Arguments:
             speed (int):
                 Max speed of the robot during the motion in mm/s.
-            dist (int):
-                The distance to travel in mm.
-            one_time_pid (Pid, optional):
-                If a pid object is given it will be used as the PidType.MOVE for this single motion.
+            angle (int):
+                The angle to travel in degress (°).
+            radius (int):
+                The radius of the arc to travel on in mm.
+            direction (Direction, optional):
+                The direction to travel in (FORWARD/BACKWARD)
             acc (int, optional):
                 The acceleration and deceleration in mm/s^2.
             stop_end (bool, optional):
                 If true at the end of the movemnt it will slow down and stop.
+            one_time_pid (Pid, optional):
+                If a pid object is given it will be used as the PidType.TURN for this single motion.
         """
         
         old_pid = self.turn_pid
