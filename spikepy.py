@@ -345,15 +345,15 @@ class Robot:
 
         Arguments:
             speed (int):
-                Max speed of the robot during the motion in mm/s.
+                The max speed of the movement in mm/s.
             dist (int):
-                The distance to travel in mm.
+                The distance to travel in mm, negative means backward.
             acc (int, optional):
-                The acceleration and deceleration in mm/s^2.
+                The acceleration and deceleration in  mm/s².
             stop_end (bool, optional):
-                If true at the end of the movemnt it will slow down and stop.
+                If ```True``` the robot will slow down and stop at the end.
             one_time_pid (Pid, optional):
-                If a pid object is given it will be used as the PidType.MOVE for this single motion.
+                It will use the given ```Pid()``` as the curent move_pid and then revert back.
         """
         
         old_pid = self.move_pid
@@ -415,19 +415,19 @@ class Robot:
 
         Arguments:
             speed (int):
-                Max speed of the robot during the motion in mm/s.
+                The max speed of the movement in mm/s.
             angle (int):
                 The angle to travel in degress (°).
-            radius (int):
+            radius (int, optional):
                 The radius of the arc to travel on in mm.
             direction (Direction, optional):
                 The direction to travel in (FORWARD/BACKWARD)
             acc (int, optional):
-                The acceleration and deceleration in mm/s^2.
+                The acceleration and deceleration in mm/s².
             stop_end (bool, optional):
-                If true at the end of the movemnt it will slow down and stop.
+                If ```True``` the robot will slow down and stop at the end.
             one_time_pid (Pid, optional):
-                If a pid object is given it will be used as the PidType.TURN for this single motion.
+                It will use the given ```Pid()``` as the curent turn_pid and then revert back.
         """
         
         old_pid = self.turn_pid

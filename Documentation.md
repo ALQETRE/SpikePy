@@ -7,7 +7,14 @@ place holder
 # Code:
 
 ## class Robot:
-    class Robot(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axel_len: int, direction: Direction = Direction.FORWARD):
+```python
+class Robot(
+    hub: PrimeHub,
+    left_wheel: Wheel,
+    right_wheel: Wheel,
+    axel_len: int,
+    direction: Direction = Direction.FORWARD):
+```
 
 | Name | Type | Desc |
 | -- | -- | -- |
@@ -15,4 +22,98 @@ place holder
 | left_wheel | Wheel | Left wheel object |
 | right_wheel | Wheel | Right wheel object |
 | axel_len | int | The distance between the wheels (center to center) in mm. |
+| **-Optional-** |
 | direction | Direction | Changes the whole direction of the bot (FORWARD/BACKWARD). |
+
+## Methods:
+
+---
+
+### move()
+```python
+move(
+    speed: int,
+    dist: int,
+    acc: int = 900,
+    stop_end: bool = True,
+    one_time_pid: Pid = None)
+```
+
+| Name | Type | Desc |
+| -- | -- | -- |
+| speed | int | The max speed of the movement in mm/s. |
+| dist | int | The distance to travel in mm, negative means backward. |
+| acc | int | The acceleration and deceleration in  mm/s². |
+| **-Optional-** |
+| stop_end | bool | If ```True``` the robot will slow down and stop at the end. |
+| one_time_pid | Pid | It will use the given ```Pid()``` as the curent move_pid and then revert back. |
+
+---
+
+### turn()
+```python
+turn(
+    speed: int,
+    angle: int,
+    radius: int = 0,
+    direction: Direction = Direction.FORWARD,
+    acc:int = 800,
+    stop_end: bool = True,
+    one_time_pid: Pid = None)
+```
+
+| Name | Type | Desc |
+| -- | -- | -- |
+| speed | int | The max speed of the movement in mm/s. |
+| angle | int | The angle to travel in degress (°). |
+| **-Optional-** |
+| radius | int | The radius of the arc to travel on in mm. |
+| acc | int | The acceleration and deceleration in mm/s². |
+| stop_end | bool | If ```True``` the robot will slow down and stop at the end. |
+| one_time_pid | Pid | It will use the given ```Pid()``` as the curent move_pid and then revert back. |
+
+---
+
+### reset_angle()
+
+```python
+reset_angle()
+```
+
+---
+
+### set_pid()
+
+```pyton
+set_pid(
+    pid_type: PidType,
+    Kp: float = None,
+    Ki: float = None,
+    Kd: float = None)
+```
+
+| Name | Type | Desc |
+| -- | -- | -- |
+| pid_type | PidType | Type of pid to set. |
+| **-Optional-** |
+| Kp | float | The kp component, if ```None``` it will be unchanged. |
+| Ki | float | The ki component, if ```None``` it will be unchanged. |
+| Kd | float | The kd component, if ```None``` it will be unchanged. |
+
+---
+
+### stop()
+
+```python
+stop()
+```
+
+---
+
+### wait_for_button()
+
+```python
+wait_for_button()
+```
+
+---
