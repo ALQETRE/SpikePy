@@ -7,6 +7,9 @@ place holder
 # Code:
 
 ## class Robot:
+
+This is the main robot object, used to execute all movements.
+
 ```python
 class Robot(
     hub: PrimeHub,
@@ -30,6 +33,9 @@ class Robot(
 ---
 
 ### move()
+
+Moves the robot in a straight line for a set distance in mm with a max speed and acceleration.
+
 ```python
 move(
     speed: int,
@@ -51,6 +57,9 @@ move(
 ---
 
 ### turn()
+
+Turns the robot along an arc with a set angle in degress (°) and radius in mm with a max speed and acceleration.
+
 ```python
 turn(
     speed: int,
@@ -76,6 +85,8 @@ turn(
 
 ### reset_angle()
 
+Resets the gyro to 0°, use when the robot is aligned.
+
 ```python
 reset_angle()
 ```
@@ -83,6 +94,8 @@ reset_angle()
 ---
 
 ### set_pid()
+
+Sets any pid inside the robot for more precise movement execution.
 
 ```pyton
 set_pid(
@@ -104,6 +117,8 @@ set_pid(
 
 ### stop()
 
+Breaks the motors and stops the robot.
+
 ```python
 stop()
 ```
@@ -111,6 +126,8 @@ stop()
 ---
 
 ### wait_for_button()
+
+Waits for any side button to be pressed.
 
 ```python
 wait_for_button()

@@ -134,7 +134,7 @@ class Wheel:
 class Robot:
     def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axel_len: int, direction: Direction = Direction.FORWARD):
         """
-        This is the ROBOT base, used to execute all movements and functions.
+        This is the main robot object, used to execute all movements.
 
         Arguments:
             hub (PrimeHub):
@@ -203,7 +203,7 @@ class Robot:
 
     def reset_angle(self):
         """
-        Resets the gyro to 0°
+        Resets the gyro to 0°, use when the robot is aligned.
         """
         
         self.hub.imu.reset_heading(0)
@@ -341,7 +341,7 @@ class Robot:
 
     def move(self, speed: int, dist: int, acc: int = 900, stop_end: bool = True, one_time_pid: Pid = None):
         """
-        Moves the robot in a straight line for a set distance in mm with a predefined speed and acceleration.
+        Moves the robot in a straight line for a set distance in mm with a max speed and acceleration.
 
         Arguments:
             speed (int):
@@ -411,7 +411,7 @@ class Robot:
 
     def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc:int = 800, stop_end: bool = True, one_time_pid: Pid = None):
         """
-        Turns the robot along an arc with a set angle in degress (°) and radius in mm with a predefined speed and acceleration.
+        Turns the robot along an arc with a set angle in degress (°) and radius in mm with a max speed and acceleration.
 
         Arguments:
             speed (int):
