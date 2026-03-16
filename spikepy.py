@@ -87,11 +87,11 @@ class Wheel:
 
         Arguments:
             port (Port):
-                The port of the motor connected to the wheel.
+                Port the motor is connected into.
             rad (int):
                 Radius of the wheel in mm.
             ratio (float, optional):
-                The ratio, if the is a gear reduction between the wheel and the motor, default is 1.
+                The ratio between the motor and the wheel, default is 1.
         """
 
         self.motor = Motor(port)

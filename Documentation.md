@@ -134,3 +134,22 @@ wait_for_button()
 ```
 
 ---
+
+## class Wheel:
+
+The Wheel class is used to store all
+information about a wheel and to execute moves.
+
+```python
+class Wheel(
+    port: Port,
+    rad: int,
+    ratio: float = 1)
+```
+
+| Name | Type | Desc |
+| -- | -- | -- |
+| port | Port | Port the motor is connected into. |
+| rad | int | Radius of the wheel in mm. |
+| **-Optional-** |
+| ratio | float | The ratio between the motor and the wheel. |
