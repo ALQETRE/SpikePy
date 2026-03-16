@@ -58,7 +58,7 @@ move(
 
 ### turn()
 
-Turns the robot along an arc with a set angle in degress (°) and radius in mm with a max speed and acceleration.
+Turns the robot along an arc with a set angle in degrees (°) and radius in mm with a max speed and acceleration.
 
 ```python
 turn(
@@ -74,7 +74,7 @@ turn(
 | Name | Type | Desc |
 | -- | -- | -- |
 | speed | int | The max speed of the movement in mm/s. |
-| angle | int | The angle to travel in degress (°). |
+| angle | int | The angle to travel in degrees (°). |
 | **-Optional-** |
 | radius | int | The radius of the arc to travel on in mm. |
 | acc | int | The acceleration and deceleration in mm/s². |
@@ -132,6 +132,56 @@ Waits for any side button to be pressed.
 ```python
 wait_for_button()
 ```
+
+---
+
+## Attributes:
+
+### hub: PrimeHub
+
+The hub object.
+
+---
+
+### left_wheel: Wheel
+
+The left wheel object.
+
+---
+
+### right_wheel: Wheel
+
+The right wheel object.
+
+---
+
+### dec_bias: int
+
+The distance you will start to decelerate later then normal to still have some speed at the final distance. Used to prevent speed dropping to 0 before reaching the desired distance. In mm.
+
+---
+
+### move_bias: int
+
+The distance the robot will stop early to account for absolute wheel slip, in mm.
+
+---
+
+### turn_bias: int
+
+The angle the robot will stop early to account for absolute slip, in degrees (°)
+
+---
+
+### move_pid: Pid
+
+The pid object used for ```move()```
+
+---
+
+### turn_pid: Pid
+
+The pid object used for ```turn()```
 
 ---
 

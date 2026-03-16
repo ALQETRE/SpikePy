@@ -157,7 +157,7 @@ class Robot:
         self.left_wheel.ratio *= -1 * direction # Swap direction for one wheel to drive forwards
         self.right_wheel.ratio *= direction
 
-        self.dir = direction
+        self._dir = direction
 
         self._axel_len = axel_len
 
@@ -170,11 +170,11 @@ class Robot:
         self.move_bias = 0
         self.turn_bias = 0
 
-        self.angular_slip_threshold = 5
-        self.linear_slip_threshold = 100
-        self.slip_acc = 0.2
+        # self.angular_slip_threshold = 5
+        # self.linear_slip_threshold = 100
+        # self.slip_acc = 0.2
 
-        self._slip = 1
+        # self._slip = 1
 
         self.move_pid = Pid(11, 2, 9)
         self.turn_pid = Pid(3, 1, 3)
@@ -198,7 +198,7 @@ class Robot:
         return angular_vel
 
     def _linear_acc(self):
-        linear_acc = self.hub.imu.acceleration(Axis.Y) * self.dir
+        linear_acc = self.hub.imu.acceleration(Axis.Y) * self._dir
         return linear_acc
 
     def reset_angle(self):
@@ -411,13 +411,13 @@ class Robot:
 
     def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc:int = 800, stop_end: bool = True, one_time_pid: Pid = None):
         """
-        Turns the robot along an arc with a set angle in degress (°) and radius in mm with a max speed and acceleration.
+        Turns the robot along an arc with a set angle in degrees (°) and radius in mm with a max speed and acceleration.
 
         Arguments:
             speed (int):
                 The max speed of the movement in mm/s.
             angle (int):
-                The angle to travel in degress (°).
+                The angle to travel in degrees (°).
             radius (int, optional):
                 The radius of the arc to travel on in mm.
             direction (Direction, optional):
