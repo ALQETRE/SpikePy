@@ -1,6 +1,6 @@
 # SpikePy Documentation:
 ### About:
-SpikePy is a robotics library made for PyBricks with the Spike Prime hub adding simple, precise, fast, relaible and customizable movement for two wheeled system. It achives this by using the onboard sensors in the hub and calculating corrections in real time for the best result.
+SpikePy is a robotics library made for PyBricks with the Spike Prime hub adding simple, precise, fast, reliable and customizable movement for two-wheeled system. It achieves this by using the onboard sensors in the hub and calculating corrections in real time for the best result.
 
 <br>
 

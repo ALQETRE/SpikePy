@@ -1,5 +1,5 @@
 from pybricks.hubs import PrimeHub
-from pybricks.pupdevices import Motor, ColorSensor
+from pybricks.pupdevices import Motor, ColorSensor, UltrasonicSensor
 
 from pybricks.parameters import Axis, Color, Button, Port
 from pybricks.tools import wait, StopWatch
@@ -132,7 +132,7 @@ class Wheel:
 
 
 class Robot:
-    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axel_len: int, direction: Direction = Direction.FORWARD):
+    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD):
         """
         This is the main robot object, used to execute all movements.
 
@@ -143,7 +143,7 @@ class Robot:
                 The left wheel of the bot.
             right_wheel (Wheel):
                 The right wheel of the bot.
-            axel_len (int):
+            axle_len (int):
                 Distance between the center of wheels in mm.
             direction (Direction, optional):
                 The direction the robot considers forward.
@@ -159,7 +159,7 @@ class Robot:
 
         self._dir = direction
 
-        self._axel_len = axel_len
+        self._axle_len = axle_len
 
         self._default_gyro = 0
 
@@ -310,7 +310,7 @@ class Robot:
         return scale
     
     def _slip_correction(self, left: int, right: int, acc: int, dt: float) -> tuple:
-        angular_vel_calc = degrees((left - right) / self._axel_len)
+        angular_vel_calc = degrees((left - right) / self._axle_len)
         angular_vel_measured = self._angular_vel()
         angular_vel_diff = abs(angular_vel_calc - angular_vel_measured)
 
@@ -379,7 +379,7 @@ class Robot:
             current_acc = self._acceleration(speed, speed, acc, dt)
 
             angle = self._angle()
-            correction = self.move_pid._calc(-angle, dt) * self._axel_len / 2
+            correction = self.move_pid._calc(-angle, dt) * self._axle_len / 2
 
             # print(f"Angle: {angle}")
             # print(f"Correction: {correction}")
@@ -409,7 +409,7 @@ class Robot:
         
         self.move_pid = old_pid
 
-    def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc:int = 800, stop_end: bool = True, one_time_pid: Pid = None):
+    def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc: int = 800, stop_end: bool = True, one_time_pid: Pid = None):
         """
         Turns the robot along an arc with a set angle in degrees (°) and radius in mm with a max speed and acceleration.
 
@@ -439,8 +439,8 @@ class Robot:
         left_speed = 0
         right_speed = 0
 
-        small_rad = radius - (self._axel_len / 2)
-        big_rad = radius + (self._axel_len / 2)
+        small_rad = radius - (self._axle_len / 2)
+        big_rad = radius + (self._axle_len / 2)
 
         if radius != 0:
             if angle > 0:
@@ -483,7 +483,7 @@ class Robot:
                 angle_calculated = abs(self.right_wheel._get_dist()/big_total_dist) * angle
 
             error = angle_calculated - angle_traveled
-            correction = self.turn_pid._calc(error, dt) * self._axel_len / 2
+            correction = self.turn_pid._calc(error, dt) * self._axle_len / 2
 
             speed_scale = self._speed_scale(error)
 
