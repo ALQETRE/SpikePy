@@ -95,13 +95,13 @@ class Wheel:
         """
 
         self.motor = Motor(port)
-        self.port = port
+        self._port = port
 
-        self.radius = rad
+        self._radius = rad
         self.ratio = ratio
 
-        self.circ = 2 * pi * rad
-        self.mm_to_deg = 1 / self.circ * 360 # To translate from  mm -> deg
+        self._circ = 2 * pi * rad
+        self._mm_to_deg = 1 / self._circ * 360 # To translate from  mm -> deg
 
         self.zero_speed = 25
         self.min_speed = 60
@@ -512,3 +512,109 @@ class Robot:
         self.turn_pid = old_pid
 
         self._default_gyro += angle
+
+
+class Actuator:
+    def __init__(self, port: Port, ratio: float = 1, range: float = 0, current_angle: float = 0):
+        """
+        Actuators are used for controling other than movement motors.
+        They allow you to move in a given range or indefinetly at a set speed.
+
+        Arguments:
+            port (Port):
+                Port the motor is connected into.
+            ratio (float, optional):
+                The ratio between the motor and the moving part, default is 1.
+            range (float, optional):
+                The range in °, in which the moving part will operate in.
+            current_angle (float, optional).
+                The current angle of the moving part, at the time of initilazation,
+                relative to the 0% value, default is 0°.
+        """
+        self.motor = Motor(port)
+        self._port = port
+
+        self.ratio = ratio
+        self.range = range
+        self.current_angle = current_angle
+
+        self.zero_speed = 25
+        self.min_speed = 60
+        self.max_speed = 1050
+
+    def actuate(self, speed: int, travel: float, wait: bool = True):
+        """
+        Moves the connected moving part in a range to an %.
+        100% means it will be at the end of the range and 0% means it will be at 0°.
+
+        Arguments:
+            speed (int):
+                The max speed of the movement in °/s.
+            travel (float):
+                The absolute % to travel to.
+            wait (bool, optional):
+                If `True` the code waits for the movement to finish, default is `True`.
+        """
+
+        desired_angle = (self.range * travel) / 100
+        angle_diff = desired_angle - self.current_angle
+        self.current_angle = desired_angle
+
+        speed *= abs(self.ratio)
+        if abs(speed) <= self.zero_speed:
+            speed = 0
+        elif abs(speed) <= self.min_speed:
+            speed = self.min_speed * (1 if speed > 0 else -1)
+        elif abs(speed) > self.max_speed:
+            # print(f"Max Speed Reached ({speed})")
+            speed = self.max_speed * (1 if speed > 0 else -1)
+
+        self.motor.run_angle(speed, angle_diff*self.ratio, wait= wait)
+
+    def rotate(self, speed: int, angle: float):
+        """
+        Rotates the actuator at a set speed for an angle.
+
+        Arguments:
+            speed (int):
+                The max speed of the movement in °/s.
+            angle (float):
+                Angle by which to rotate. Can be negative.
+        """
+
+
+        speed *= abs(self.ratio)
+
+        if abs(speed) <= self.zero_speed:
+            speed = 0
+        elif abs(speed) <= self.min_speed:
+            speed = self.min_speed * (1 if speed > 0 else -1)
+        elif abs(speed) > self.max_speed:
+            # print(f"Max Speed Reached ({speed})")
+            speed = self.max_speed * (1 if speed > 0 else -1)
+
+        self.motor.run_angle(speed, angle*self.ratio)
+
+        self.current_angle += (angle * (1 if speed > 0 else -1)) % (((self.range // 360) + 1) * 360)
+
+    def set_actuator(self, ratio: float = None, range: float = None, current_angle: float = None):
+        """
+        Sets the actuator parameters. If set to `None` it will remain unchanged.
+
+        Arguments:
+            ratio (float, optional):
+                The ratio between the motor and the moving part, default is 1.
+            range (float, optional):
+                The range in °, in which the moving part will operate in.
+            current_angle (float, optional).
+                The current angle of the moving part, at the time of initilazation,
+                relative to the 0% value, default is 0°.
+        """
+
+
+        if not ratio is None:
+            self.ratio = ratio
+        if not range is None:
+            self.range = range
+        if not current_angle is None:
+            self.current_angle = current_angle

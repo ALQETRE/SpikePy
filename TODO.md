@@ -2,17 +2,18 @@
 
 ### Priority:
 - test stop_end
-- friction support
+- battery checker
+- test actuators
 
 ### Later priority:
 - follow_line()
 - until implementation
 - align()
 - Documentation
-- battery checker
+- friction support
 
 ### Nice to have:
-- actuator support
+
     
 <br><br>
 
