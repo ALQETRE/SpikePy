@@ -33,9 +33,9 @@ bot.reset_angle()
 # bot.move(480, 200, stop_end= False)
 # bot.turn(400, 90, 300, acc= 800)
 
-actuator.set_actuator(1, 90, 0)
-actuator.rotate(500, 210)
-actuator.actuate(500, 100)
-actuator.actuate(500, 0)
+# actuator.set_actuator(1, 90, 0)
+# actuator.rotate(500, 210)
+# actuator.actuate(500, 100)
+# actuator.actuate(500, 0)
 
 print("Done")

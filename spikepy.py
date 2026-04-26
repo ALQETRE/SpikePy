@@ -1,11 +1,14 @@
 from pybricks.hubs import PrimeHub
 from pybricks.pupdevices import Motor, ColorSensor, UltrasonicSensor
 
-from pybricks.parameters import Axis, Color, Button, Port
+from pybricks.parameters import Axis, Color, Port
 from pybricks.tools import wait, StopWatch
 
 from umath import pi, cos, degrees, radians
 
+
+class BatteryException(Exception):
+    pass
 
 class Direction:
     FORWARD = 1
@@ -132,7 +135,7 @@ class Wheel:
 
 
 class Robot:
-    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD):
+    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD, verbose: bool = True, battery_low: int = 7300, battery_high:int = 8500):
         """
         This is the main robot object, used to execute all movements.
 
@@ -147,9 +150,26 @@ class Robot:
                 Distance between the center of wheels in mm.
             direction (Direction, optional):
                 The direction the robot considers forward.
+            verbose (bool, optional):
+                If true the robot will send inforamtion to the pc.
+                This is ILLEGAL in most cometitions if connected with bluetooth, so turn it off before competing, by default it is `True`.
+            battery_low (int, optional):
+                Level in mV at which to toggle low level battery warning.
+            battery_high (int, optional):
+                Level in mV at which to toggle high level battery warning.
+                By default it is set 8500mV and the max of the battery is 8400mV.
         """
 
         self.hub = hub
+        self.verbose = verbose
+
+        if verbose:
+            print(f"VERBOSE mode is turned on, this is illegal in most competitons!\n")
+
+        self.battery_low = battery_low
+        self.battery_high = battery_high # Max of the battery is 8.4V
+
+        self.battery_check()
 
         self.left_wheel = left_wheel
         self.right_wheel = right_wheel
@@ -178,6 +198,18 @@ class Robot:
 
         self.move_pid = Pid(11, 2, 9)
         self.turn_pid = Pid(3, 1, 3)
+
+    def battery_check(self):
+        battery_voltage = self.hub.battery.voltage()
+        if battery_voltage > self.battery_high:
+            if self.verbose:
+                raise BatteryException(f"HIGH battery! ({battery_voltage}mV)")
+            self.hub.light.blink(Color.VIOLET, [400, 200])
+
+        if battery_voltage < self.battery_low:
+            if self.verbose:
+                raise BatteryException(f"LOW battery! ({battery_voltage}mV)")
+            self.hub.light.blink(Color.RED, [400, 200])
 
     def stop(self):
         """

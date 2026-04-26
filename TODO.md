@@ -2,7 +2,7 @@
 
 ### Priority:
 - test stop_end
-- battery checker
+
 
 ### Later priority:
 - follow_line()
