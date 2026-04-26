@@ -2,18 +2,18 @@
 
 ### Priority:
 - test stop_end
+- align()
+- Documentation
 
 
 ### Later priority:
-- follow_line()
 - until implementation
-- align()
-- Documentation
-- friction support
 
 ### Nice to have:
+- follow_line()
+- friction support
 
-    
+
 <br><br>
 
 # Testing:
