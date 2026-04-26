@@ -3,7 +3,6 @@
 ### Priority:
 - test stop_end
 - battery checker
-- test actuators
 
 ### Later priority:
 - follow_line()

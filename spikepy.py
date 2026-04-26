@@ -534,9 +534,12 @@ class Actuator:
         self.motor = Motor(port)
         self._port = port
 
-        self.ratio = ratio
-        self.range = range
+        self._ratio = ratio
+        self._range = range
         self.current_angle = current_angle
+
+        self._total_range = ((self._range // 360) + 1) * 360
+        self._opp_center = ((range / 2) + 180) % self._total_range
 
         self.zero_speed = 25
         self.min_speed = 60
@@ -556,11 +559,11 @@ class Actuator:
                 If `True` the code waits for the movement to finish, default is `True`.
         """
 
-        desired_angle = (self.range * travel) / 100
+        desired_angle = (self._range * travel) / 100
         angle_diff = desired_angle - self.current_angle
         self.current_angle = desired_angle
 
-        speed *= abs(self.ratio)
+        speed *= abs(self._ratio)
         if abs(speed) <= self.zero_speed:
             speed = 0
         elif abs(speed) <= self.min_speed:
@@ -569,7 +572,7 @@ class Actuator:
             # print(f"Max Speed Reached ({speed})")
             speed = self.max_speed * (1 if speed > 0 else -1)
 
-        self.motor.run_angle(speed, angle_diff*self.ratio, wait= wait)
+        self.motor.run_angle(speed, angle_diff*self._ratio, wait= wait)
 
     def rotate(self, speed: int, angle: float):
         """
@@ -583,7 +586,7 @@ class Actuator:
         """
 
 
-        speed *= abs(self.ratio)
+        speed *= abs(self._ratio)
 
         if abs(speed) <= self.zero_speed:
             speed = 0
@@ -593,9 +596,13 @@ class Actuator:
             # print(f"Max Speed Reached ({speed})")
             speed = self.max_speed * (1 if speed > 0 else -1)
 
-        self.motor.run_angle(speed, angle*self.ratio)
+        self.motor.run_angle(speed, angle*self._ratio)
 
-        self.current_angle += (angle * (1 if speed > 0 else -1)) % (((self.range // 360) + 1) * 360)
+        angle_change = angle * (1 if speed > 0 else -1)
+        angle_change %= self._total_range
+        if angle_change > self._opp_center:
+            angle_change -= self._total_range
+        self.current_angle += angle_change
 
     def set_actuator(self, ratio: float = None, range: float = None, current_angle: float = None):
         """
@@ -611,10 +618,12 @@ class Actuator:
                 relative to the 0% value, default is 0°.
         """
 
-
         if not ratio is None:
-            self.ratio = ratio
+            self._ratio = ratio
         if not range is None:
-            self.range = range
+            self._range = range
         if not current_angle is None:
             self.current_angle = current_angle
+
+        self._total_range = ((self._range // 360) + 1) * 360
+        self._opp_center = ((range / 2) + 180) % self._total_range
