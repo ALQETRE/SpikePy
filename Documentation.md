@@ -1,5 +1,5 @@
 # About SpikePy:
-SpikePy is a robotics library made for PyBricks with the Spike Prime hub adding simple, precise, fast, reliable and customizable movement for two-wheeled system. It achieves this by using the onboard sensors in the hub and calculating corrections in real time for the best result.
+SpikePy is a robotics library made for PyBricks with the SPIKE Prime hub, adding simple, precise, fast, reliable, and customizable movement for two-wheeled systems. It achieves this by using the onboard sensors in the hub and calculating corrections in real time for the best results.
 
 # Installation:
 First download the files from github, then place the downloaded ```spikepy.py``` into your project folder. Open the folder with VSCode, in the extension tab search "Pybricks Runner" and install if you haven't already. Then open the terminal and do ```pip install pybricksdev```. Now you can import everything in your ```main.py``` by doing ```from spikepy import *``` then just connect the hub with pybricks runner and make sure to always run the code when you have your ```main.py``` file open.
