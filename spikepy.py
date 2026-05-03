@@ -111,7 +111,7 @@ class Wheel:
         self.max_speed = 1050
 
     def _run(self, speed):
-        speed *= self.ratio * self.mm_to_deg
+        speed *= self.ratio * self._mm_to_deg
 
         if abs(speed) <= self.zero_speed:
             speed = 0
@@ -127,7 +127,7 @@ class Wheel:
         self.motor.brake()
 
     def _get_dist(self):
-        dist = self.motor.angle() / self.mm_to_deg / self.ratio
+        dist = self.motor.angle() / self._mm_to_deg / self.ratio
         return dist
     
     def _reset(self):
@@ -196,7 +196,7 @@ class Robot:
 
         # self._slip = 1
 
-        self.move_pid = Pid(11, 2, 9)
+        self.move_pid = Pid(3, 1, 3)
         self.turn_pid = Pid(3, 1, 3)
 
     def battery_check(self):
@@ -395,6 +395,8 @@ class Robot:
         true_dist = abs(dist) - self.move_bias
 
         self.move_pid._reset(-self._angle())
+
+        speed *= 1 if dist > 0 else -1
 
         dist_traveled = 0
         self._reset_slip()
