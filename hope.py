@@ -17,7 +17,7 @@ bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
 
 def blue_track():
-    bot.move_pid = Pid(4, 1, 4) # <- Try more sensitive or no I component
+    bot.move_pid = Pid(4, 1, 4)
     bot.turn_pid = Pid(3, 1, 3)
 
     bot.move_bias = 0
@@ -28,7 +28,7 @@ def blue_track():
     bot.reset_angle()
     actuator.set_actuator(-10, 90, 0)
 
-    bot.move(480, 400, one_time_pid= Pid(0, 0, 0)) # <- add one_time_pid
+    bot.move(480, 400, one_time_pid= Pid(0, 0, 0))
     bot.turn(450, -15, 510)
     bot.turn(450, 15, 410)
     bot.move(350, 160)
@@ -38,7 +38,7 @@ def blue_track():
     bot.move(300, -20)
     actuator.actuate(800, 100)
     bot._default_gyro = 10
-    bot.move(200, -400, one_time_pid= Pid(10, 1, 7)) # <- try to remove one_time_pid
+    bot.move(200, -400, one_time_pid= Pid(10, 1, 7))
     bot.move(480, -400)
 
 
@@ -65,7 +65,7 @@ def green_track():
     actuator.actuate(1000, 0)
     print(bot._default_gyro)
 
-    bot.turn(480, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
+    bot.turn(480, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD) # Turn bit less?
 
 
     actuator.actuate(1000, 100)
