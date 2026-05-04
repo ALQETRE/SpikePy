@@ -180,6 +180,7 @@ class Robot:
         self._dir = direction
 
         self._axle_len = axle_len
+        self.WHEEL_ROTATION = axle_len / 2
 
         self._default_gyro = 0
 
@@ -517,6 +518,7 @@ class Robot:
                 angle_calculated = abs(self.right_wheel._get_dist()/big_total_dist) * angle
 
             error = angle_calculated - angle_traveled
+            error *= direction
             correction = self.turn_pid._calc(error, dt) * self._axle_len / 2
 
             speed_scale = self._speed_scale(error)
@@ -545,7 +547,7 @@ class Robot:
         
         self.turn_pid = old_pid
 
-        self._default_gyro += angle
+        self._default_gyro += angle * direction
 
 
 class Actuator:
