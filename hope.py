@@ -20,6 +20,7 @@ def blue_track():
     bot.move_pid = Pid(4, 1, 4) # <- Try more sensitive or no I component
     bot.turn_pid = Pid(3, 1, 3)
 
+    bot.move_bias = 0
     bot.turn_bias = 2
 
     # bot.move(400, -40) # <- try
@@ -40,31 +41,44 @@ def blue_track():
     bot.move(200, -400, one_time_pid= Pid(10, 1, 7)) # <- try to remove one_time_pid
     bot.move(480, -400)
 
-# def green_track():
 
-#     reset_gyro()
+def green_track():
 
-#     move(fast_speed, 740)
-#     turn(green_turn, -50, radius=WHEEL_ROTATION)
-#     turn(green_turn, 5)
-#     move(fast_speed - 200, -160)
-#     turn(green_turn, 90, radius=WHEEL_ROTATION)
+    bot.move_pid = Pid(4, 1, 4)
+    bot.turn_pid = Pid(3, 1, 3)
 
-#     move(fast_speed - 200, 60)
-#     move(fast_speed, -5)
-#     await actuator.actuate(1200, 0)
-#     turn(fast_speed, -50, radius=-WHEEL_ROTATION)
+    bot.move_bias = 0
+    bot.turn_bias = 3
+
+    bot.reset_angle()
+    actuator.set_actuator(2, 150, 110)
 
 
-#     await actuator.actuate(1000, 150)
+    bot.move(480, 720, one_time_pid= Pid(0, 0, 0))
+    bot.turn(250, -45, bot.WHEEL_ROTATION)
+    # bot.turn(250, 5)
+    bot.move(300, -170)
+    bot.turn(250, 90, bot.WHEEL_ROTATION)
 
-#     move(fast_speed, 50)
-#     turn(green_turn, -45, radius=WHEEL_ROTATION)
-#     default_gyro = 88 # krystofire88
-#     move(fast_speed, 500)
+    bot.move(300, 50)
+    bot.move(480, -10)
+    actuator.actuate(1000, 0)
+    print(bot._default_gyro)
+
+    bot.turn(480, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
+
+
+    actuator.actuate(1000, 100)
+
+    print(bot._default_gyro)
+
+    # bot.move(480, 50)
+    # bot.turn(250, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
+    # bot._default_gyro = 88 # krystofire88
+    bot.move(480, 500)
 
 
 
-blue_track()
+green_track()
 
 print("Done")
