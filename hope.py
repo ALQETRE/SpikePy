@@ -87,10 +87,39 @@ def orange_track():
 
     bot.move(600, 1880)
 
+def azure_track():
+    bot.move_pid = Pid(4, 1, 4)
+    bot.turn_pid = Pid(3, 1, 3)
+
+    bot.move_bias = 0
+    bot.turn_bias = 0
+
+    bot.reset_angle()
+    actuator.set_actuator(2, 100, 0)
+
+    actuator.actuate(500, 100)
+    bot.move(480, 400)
+    wait(300)
+    for i in range(4):
+        actuator.actuate(1500, 0)
+        actuator.actuate(500, 100)
+
+    bot._reset_dist()
+    bot.turn(480, -102)
+
+    # move(pjecet, 465)
+    # turn(shtyrzhysta, -90, radius=WHEEL_ROTATION)
+    bot.move(400, 340)
+    bot.turn(400, 33)
+    actuator.actuate(500, 0)
+    bot.reset_angle()
+    bot.turn(480, -170, bot.WHEEL_ROTATION)
+    bot.reset_angle()
+    bot.move(500, 500)
 
 
 
 
-orange_track()
-
+azure_track()
+# bot.turn(480, -90)
 print("Done")
