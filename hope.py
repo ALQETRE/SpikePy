@@ -55,17 +55,18 @@ def green_track():
 
 
     bot.move(480, 720, one_time_pid= Pid(0, 0, 0))
-    bot.turn(250, -45, bot.WHEEL_ROTATION)
-    # bot.turn(250, 5)
+    bot.turn(250, -43, bot.WHEEL_ROTATION)
+    bot.turn(250, 8, bot.WHEEL_ROTATION)
     bot.move(300, -170)
     bot.turn(250, 90, bot.WHEEL_ROTATION)
 
-    bot.move(300, 50)
+    bot.move(300, 30)
     bot.move(480, -10)
     actuator.actuate(1000, 0)
     print(bot._default_gyro)
 
-    bot.turn(480, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD) # Turn bit less?
+    bot.turn(480, -30, bot.WHEEL_ROTATION, direction= Direction.BACKWARD) # Overchutes bc obstacle
+    bot._default_gyro = 90
 
 
     actuator.actuate(1000, 100)
@@ -75,7 +76,7 @@ def green_track():
     # bot.move(480, 50)
     # bot.turn(250, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
     # bot._default_gyro = 88 # krystofire88
-    bot.move(480, 500)
+    bot.move(480, 500, one_time_pid= Pid(6, 1, 5))
 
 
 
