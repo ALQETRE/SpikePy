@@ -238,7 +238,7 @@ class Robot:
         """
         Resets the gyro to 0°, use when the robot is aligned.
         """
-        wait(500)
+        wait(800)
         self.hub.imu.reset_heading(0)
         self._default_gyro = 0
 

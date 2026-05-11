@@ -78,8 +78,19 @@ def green_track():
     # bot._default_gyro = 88 # krystofire88
     bot.move(480, 500, one_time_pid= Pid(6, 1, 5))
 
+def orange_track():
+    bot.move_pid = Pid(3, 0, 10)
+
+    bot.move_bias = 0
+
+    bot.reset_angle()
+
+    bot.move(600, 1880)
 
 
-green_track()
+
+
+
+orange_track()
 
 print("Done")
