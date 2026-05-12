@@ -17,11 +17,15 @@ bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
 
 def blue_track():
-    bot.move_pid = Pid(4, 1, 4)
-    bot.turn_pid = Pid(3, 1, 3)
 
-    bot.move_bias = 0
-    bot.turn_bias = 2
+    blue_setting = Setting(
+        Pid(4, 1, 4),
+        Pid(3, 1, 3),
+        0,
+        2,
+        1
+    )
+    bot.set_settings(blue_setting)
 
     # bot.move(400, -40) # <- try
 
@@ -44,11 +48,14 @@ def blue_track():
 
 def green_track():
 
-    bot.move_pid = Pid(4, 1, 4)
-    bot.turn_pid = Pid(3, 1, 3)
-
-    bot.move_bias = 0
-    bot.turn_bias = 3
+    green_setting = Setting(
+        Pid(4, 1, 4),
+        Pid(3, 1, 3),
+        0,
+        3,
+        1
+    )
+    bot.set_settings(green_setting)
 
     bot.reset_angle()
     actuator.set_actuator(2, 150, 110)
@@ -83,23 +90,36 @@ def orange_track():
 
     bot.move_bias = 0
 
+    orange_setting = Setting(
+        Pid(3, 0, 10),
+        None,
+        0,
+        None,
+        1
+    )
+    bot.set_settings(orange_setting)
+
     bot.reset_angle()
 
     bot.move(600, 1880)
 
 def azure_track():
-    bot.move_pid = Pid(4, 1, 4)
-    bot.turn_pid = Pid(3, 1, 3)
 
-    bot.move_bias = 0
-    bot.turn_bias = 0
+    azure_setting = Setting(
+        Pid(4, 1, 4),
+        Pid(3, 1, 3),
+        0,
+        0,
+        1 # Mby decrease
+    )
+    bot.set_settings(azure_setting)
 
     bot.reset_angle()
     actuator.set_actuator(2, 100, 0)
 
     actuator.actuate(500, 100)
     bot.move(480, 400)
-    wait(300)
+    wait(300) # Probably remove
     for i in range(4):
         actuator.actuate(1500, 0)
         actuator.actuate(500, 100)

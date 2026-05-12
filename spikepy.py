@@ -38,6 +38,7 @@ class PidType:
     """Follow PID - used for keeping the robot following the target function, when using ```follow(...)```."""
 
 
+
 class Pid:
     def __init__(self, kp: float, ki: float, kd: float):
         """
@@ -132,6 +133,16 @@ class Wheel:
     
     def _reset(self):
         self.motor.reset_angle(0)
+
+
+class Setting:
+    def __init__(self, move_pid : Pid, turn_pid : Pid, move_bias : float, turn_bias : float, dec_bias : float = 1):
+        self.dec_bias = dec_bias
+        self.move_bias = move_bias
+        self.turn_bias = turn_bias
+
+        self.move_pid = move_pid
+        self.turn_pid = turn_pid
 
 
 class Robot:
@@ -278,11 +289,29 @@ class Robot:
             if not Kd is None:
                 self.move_pid.kd = Kd
         elif pid_type == PidType.TURN:
-            pass
+            if not Kp is None:
+                self.turn_pid.kp = Kp
+            if not Ki is None:
+                self.turn_pid.ki = Ki
+            if not Kd is None:
+                self.turn_pid.kd = Kd
         elif pid_type == PidType.FOLLOW:
             pass
 
         # TODO: Add support for more types of pids
+
+    def set_settings(self, setting : Setting):
+        if not setting.dec_bias is None:
+            self.dec_bias = setting.dec_bias
+        if not setting.move_bias is None:
+            self.move_bias = setting.move_bias
+        if not setting.turn_bias is None:
+            self.turn_bias = setting.turn_bias
+
+        if not setting.move_pid is None:
+            self.move_pid = setting.move_pid
+        if not setting.turn_pid is None:
+            self.turn_pid = setting.turn_pid
 
     def _get_dist(self):
         left_dist = self.left_wheel._get_dist()
