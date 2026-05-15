@@ -21,6 +21,8 @@ def blue_track():
     blue_setting = Setting(
         Pid(4, 1, 4),
         Pid(3, 1, 3),
+        None,
+        None,
         0,
         2,
         1
@@ -51,6 +53,8 @@ def green_track():
     green_setting = Setting(
         Pid(4, 1, 4),
         Pid(3, 1, 3),
+        None,
+        None,
         0,
         3,
         1
@@ -93,6 +97,8 @@ def orange_track():
     orange_setting = Setting(
         Pid(3, 0, 10),
         None,
+        None,
+        None,
         0,
         None,
         1
@@ -108,6 +114,8 @@ def azure_track():
     azure_setting = Setting(
         Pid(4, 1, 4),
         Pid(3, 1, 3),
+        None,
+        Pid(5, 3, 8),
         0,
         1,
         1

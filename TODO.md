@@ -2,7 +2,6 @@
 
 ### Priority:
 - test stop_end
-- align()
 - Documentation
 - Docs str on WHEEL_ROTATION
 - Check backwards turn (def_gyro)

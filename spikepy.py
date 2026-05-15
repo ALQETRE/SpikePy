@@ -37,6 +37,9 @@ class PidType:
     FOLLOW = 2
     """Follow PID - used for keeping the robot following the target function, when using ```follow(...)```."""
 
+    ALIGN = 3
+    """Align PID - used for make the robot facing in the correct direction, when using ```align(...)```"""
+
 
 
 class Pid:
@@ -136,13 +139,15 @@ class Wheel:
 
 
 class Setting:
-    def __init__(self, move_pid : Pid, turn_pid : Pid, move_bias : float, turn_bias : float, dec_bias : float = 1):
+    def __init__(self, move_pid: Pid, turn_pid: Pid, follow_pid: Pid, align_pid: Pid, move_bias: float, turn_bias: float, dec_bias: float = 1):
         self.dec_bias = dec_bias
         self.move_bias = move_bias
         self.turn_bias = turn_bias
 
         self.move_pid = move_pid
         self.turn_pid = turn_pid
+        self.follow_pid = follow_pid
+        self.align_pid = align_pid
 
 
 class Robot:
@@ -210,6 +215,8 @@ class Robot:
 
         self.move_pid = Pid(3, 1, 3)
         self.turn_pid = Pid(3, 1, 3)
+        self.follow_pid = Pid(0, 0, 0)
+        self.align_pid = Pid(5, 3, 8)
 
     def battery_check(self):
         battery_voltage = self.hub.battery.voltage()
@@ -297,7 +304,19 @@ class Robot:
             if not Kd is None:
                 self.turn_pid.kd = Kd
         elif pid_type == PidType.FOLLOW:
-            pass
+            if not Kp is None:
+                self.follow_pid.kp = Kp
+            if not Ki is None:
+                self.follow_pid.ki = Ki
+            if not Kd is None:
+                self.follow_pid.kd = Kd
+        elif pid_type == PidType.ALIGN:
+            if not Kp is None:
+                self.align_pid.kp = Kp
+            if not Ki is None:
+                self.align_pid.ki = Ki
+            if not Kd is None:
+                self.align_pid.kd = Kd
 
         # TODO: Add support for more types of pids
 
@@ -313,12 +332,15 @@ class Robot:
             self.move_pid = setting.move_pid
         if not setting.turn_pid is None:
             self.turn_pid = setting.turn_pid
+        if not setting.follow_pid is None:
+            self.follow_pid = setting.follow_pid
+        if not setting.align_pid is None:
+            self.align_pid = setting.align_pid
 
     def _get_dist(self):
-        wait(1)
         left_dist = self.left_wheel._get_dist()
         right_dist = self.right_wheel._get_dist()
-        wait(1)
+        wait(3)
 
         return (left_dist + right_dist) / 2
     
@@ -584,12 +606,25 @@ class Robot:
 
         self._default_gyro += angle * direction
 
-    def align(self, speed_mul= 2, deviation= 1, one_time_pid= Pid(5, 3, 8)):
-        old_pid = self.turn_pid
+    def align(self, speed_mul: float = 2, deviation: float = 1, one_time_pid: Pid = None):
+        """
+        Aligns the robot to the intendet heading +- deviation.
+
+        Arguments:
+            speed_mul (float, optional):
+                Multiplies the pid output used for speed, default is 2.
+            deviation (float, optional):
+                Sets the max deviation to reach before ending, default is +- 1°.
+            one_time_pid (Pid, optional):
+                It will use the given ```Pid()``` as the curent align_pid and then revert back.
+        """
+
+
+        old_pid = self.align_pid
         if not one_time_pid is None:
-            self.turn_pid = one_time_pid
+            self.align_pid = one_time_pid
             
-        self.turn_pid._reset(-self._angle())
+        self.align_pid._reset(-self._angle())
 
         angle = self._angle()
 
@@ -605,7 +640,7 @@ class Robot:
             i += 1
 
             angle = self._angle()
-            correction = self.turn_pid._calc(-angle, dt) * self._axle_len / 2
+            correction = self.align_pid._calc(-angle, dt) * self._axle_len / 2
 
             # print(f"Angle: {angle}")
             # print(f"Correction: {correction}")
@@ -618,7 +653,7 @@ class Robot:
             self.right_wheel._run(right_speed)
 
         self.stop()
-        self.turn_pid = old_pid
+        self.align_pid = old_pid
 
 
 
