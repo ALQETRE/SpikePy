@@ -146,7 +146,7 @@ class Setting:
 
 
 class Robot:
-    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD, verbose: bool = True, battery_low: int = 7300, battery_high:int = 8500):
+    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD, verbose: bool = True, battery_low: int = 7380, battery_high:int = 8500):
         """
         This is the main robot object, used to execute all movements.
 
@@ -238,6 +238,7 @@ class Robot:
     def _angle(self):
         angle = self.hub.imu.heading()
         angle -= self._default_gyro
+        wait(3)
         return angle
     
     def _angular_vel(self):
@@ -314,8 +315,10 @@ class Robot:
             self.turn_pid = setting.turn_pid
 
     def _get_dist(self):
+        wait(1)
         left_dist = self.left_wheel._get_dist()
         right_dist = self.right_wheel._get_dist()
+        wait(1)
 
         return (left_dist + right_dist) / 2
     
@@ -580,6 +583,44 @@ class Robot:
         self.turn_pid = old_pid
 
         self._default_gyro += angle * direction
+
+    def align(self, speed_mul= 2, deviation= 1, one_time_pid= Pid(5, 3, 8)):
+        old_pid = self.turn_pid
+        if not one_time_pid is None:
+            self.turn_pid = one_time_pid
+            
+        self.turn_pid._reset(-self._angle())
+
+        angle = self._angle()
+
+        self._reset_slip()
+        self._reset_dist()
+
+        i = 1
+        stopwatch = StopWatch()
+
+        while abs(angle) > deviation:
+
+            dt = stopwatch.time() / 1000 / i
+            i += 1
+
+            angle = self._angle()
+            correction = self.turn_pid._calc(-angle, dt) * self._axle_len / 2
+
+            # print(f"Angle: {angle}")
+            # print(f"Correction: {correction}")
+            # print(f"Speed scale: {self._speed_scale(-angle)}")
+
+            left_speed = correction * speed_mul
+            right_speed = -correction * speed_mul
+
+            self.left_wheel._run(left_speed)
+            self.right_wheel._run(right_speed)
+
+        self.stop()
+        self.turn_pid = old_pid
+
+
 
 
 class Actuator:

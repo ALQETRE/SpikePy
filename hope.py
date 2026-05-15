@@ -109,8 +109,8 @@ def azure_track():
         Pid(4, 1, 4),
         Pid(3, 1, 3),
         0,
-        0,
-        1 # Mby decrease
+        1,
+        1
     )
     bot.set_settings(azure_setting)
 
@@ -118,22 +118,27 @@ def azure_track():
     actuator.set_actuator(2, 100, 0)
 
     actuator.actuate(500, 100)
-    bot.move(480, 400)
+    bot._default_gyro = 1
+    bot.move(480, 410)
     wait(300) # Probably remove
     for i in range(4):
+        bot.align()
         actuator.actuate(1500, 0)
         actuator.actuate(500, 100)
+    bot._default_gyro = 0
 
-    bot._reset_dist()
-    bot.turn(480, -102)
+
+    bot.align()
+
+    bot.turn(400, -96)
 
     # move(pjecet, 465)
     # turn(shtyrzhysta, -90, radius=WHEEL_ROTATION)
-    bot.move(400, 340)
-    bot.turn(400, 33)
-    actuator.actuate(500, 0)
+    bot.move(400, 345)
+    bot.turn(400, 21)
+    actuator.actuate(500, -20)
     bot.reset_angle()
-    bot.turn(480, -170, bot.WHEEL_ROTATION)
+    bot.turn(300, -140)
     bot.reset_angle()
     bot.move(500, 500)
 
@@ -142,4 +147,8 @@ def azure_track():
 
 azure_track()
 # bot.turn(480, -90)
+
+
+
 print("Done")
+wait(10)
