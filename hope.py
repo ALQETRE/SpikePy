@@ -150,10 +150,42 @@ def azure_track():
     bot.reset_angle()
     bot.move(500, 500)
 
+def white_track():
+
+    white_setting = Setting(
+        Pid(4, 1, 4),
+        Pid(2, 0, 5),
+        None,
+        Pid(5, 3, 8),
+        0,
+        3,
+        1
+    )
+    bot.set_settings(white_setting)
+
+    bot.reset_angle()
+    
+    bot.move(480, 650, one_time_pid= Pid(0, 0, 0))
+    bot.turn(200, -80)
+    bot.move(420, 430)
+    bot.turn(150, 80)
+    bot.align()
+    bot.move(150, 270)
+
+    bot.move(300, -210)
+    bot.move(400, 75)
+    bot.turn(350, 80)
+    bot.move(350, 80)
+    bot.turn(350, 55)
+    bot.move(300, 200)
+    bot.move(300, -100)
+    bot.turn(350, -40)
+    bot.turn(350, 70, 400)
+    bot.move(480, 500)
 
 
 
-azure_track()
+white_track()
 # bot.turn(480, -90)
 
 
