@@ -184,8 +184,26 @@ def white_track():
     bot.move(480, 500)
 
 
+def magenta_track():
+    magenta_setting = Setting(
+        Pid(4, 1, 4),
+        Pid(2, 0, 5),
+        None,
+        Pid(5, 3, 8),
+        0,
+        3,
+        1
+    )
+    bot.set_settings(magenta_setting)
 
-white_track()
+    bot.reset_angle()
+    actuator.set_actuator(2, 50, 50)
+
+    actuator.rotate(900, -360*100)
+
+
+
+magenta_track()
 # bot.turn(480, -90)
 
 
