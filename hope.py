@@ -186,7 +186,7 @@ def white_track():
 
 def magenta_track():
     magenta_setting = Setting(
-        Pid(4, 1, 4),
+        Pid(4, 3.1, 4),
         Pid(2, 0, 5),
         None,
         Pid(5, 3, 8),
@@ -199,7 +199,12 @@ def magenta_track():
     bot.reset_angle()
     actuator.set_actuator(2, 50, 50)
 
-    actuator.rotate(900, -360*100)
+    bot._default_gyro = 15
+    bot.move(350, 900)
+    actuator.rotate(900, -360*12)
+    actuator.rotate(900, 360*4)
+
+    bot.move(400, -1000)
 
 
 
