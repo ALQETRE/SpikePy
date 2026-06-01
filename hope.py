@@ -206,11 +206,51 @@ def magenta_track():
 
     bot.move(400, -1000)
 
+color_sensor = ColorSensor(Port.D)
+color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, Color.GREEN, Color.CYAN, Color.BLACK])
+
+def do_track():
+    check = True
+    while check:
+        bot.wait_for_button()
+
+        # left_motor.run(-400)
+        # right_motor.run(-400)
+        wait(100)
+        bot.stop()
+
+        check = False
+
+        track_color = color_sensor.color()
+        print(track_color)
+
+        # await orange_track()
+
+        if track_color == Color.BLUE:
+            blue_track()
+        elif track_color == Color.WHITE:
+            white_track()
+        elif track_color == Color.GREEN:
+            green_track()
+        elif track_color == Color.CYAN:
+            azure_track()
+        elif track_color == Color.RED:
+            magenta_track()
+        elif track_color == Color.YELLOW:
+            orange_track()
+        elif track_color == Color.BLACK:
+            # yellow_track()
+            pass
+
+        else:
+            bot.hub.speaker.beep(700, 400)
+            wait(100)
+            bot.hub.speaker.beep(700, 400)
+            check = True
 
 
-magenta_track()
-# bot.turn(480, -90)
-
+while True:
+    do_track()
 
 
 print("Done")
