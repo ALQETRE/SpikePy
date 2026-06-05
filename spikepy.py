@@ -291,7 +291,7 @@ class Robot:
         self.hub.imu.reset_heading(0)
         self._default_gyro = 0
 
-    def wait_for_button(self, freq= None):
+    def wait_for_button(self, delay_after: int = 200, freq: int= None):
         """
         Waits for any side button to be pressed.
         """
@@ -301,7 +301,7 @@ class Robot:
             if freq is not None:
                 self.hub.speaker.beep(freq, 50)
                 wait(30)
-        wait(300)
+        wait(delay_after)
 
     def set_pid(self, pid_type: PidType, Kp: float = None, Ki: float = None, Kd: float = None):
         """

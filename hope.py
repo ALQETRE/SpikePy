@@ -171,19 +171,19 @@ def white_track():
     bot.move(480, 440)
     bot.turn(150, 80)
     bot.align(speed_mul= 3)
-    bot.move(150, 270)
+    bot.move(150, 250)
 
     bot.move(300, -210)
     bot.move(480, 95)
     bot.turn(300, 80)
 
-    bot.move(350, 90)
+    bot.move(350, 85)
     bot.turn(300, 45, acc= 500)
 
     bot.move(400, 200)
     bot.move(480, -100)
     bot.turn(400, -40)
-    bot.turn(400, 80, 300, stop_end= False, verbose= False)
+    bot.turn(400, 87, 300, stop_end= False, verbose= False)
     bot.move(400, 500,verbose= False)
 
 
@@ -195,7 +195,7 @@ def magenta_track():
         Pid(5, 3, 8),
         0,
         3,
-        40
+        50
     )
     bot.set_settings(magenta_setting)
 
@@ -219,7 +219,7 @@ def yellow_track():
         Pid(5, 3, 8),
         0,
         3,
-        1
+        10
     )
     bot.set_settings(yellow_setting)
 
@@ -240,18 +240,17 @@ color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE
 def do_track():
     check = True
     while check:
-        bot.wait_for_button(freq= None) # Freq 300
+        bot.wait_for_button(freq= None, delay_after= 0) # Freq 300
 
         # left_motor.run(-400)
         # right_motor.run(-400)
-        wait(100)
+        # wait(100)
 
         bot.stop()
 
         check = False
 
         track_color = color_sensor.color()
-        print(track_color)
 
         # await orange_track()
 
