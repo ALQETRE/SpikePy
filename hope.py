@@ -205,9 +205,11 @@ def magenta_track():
     actuator.set_actuator(2, 50, 50)
 
     bot._default_gyro = 15
-    bot.move(350, 900)
-    actuator.rotate(900, -360*12)
-    actuator.rotate(900, 360*4)
+    bot.move(350, 950)
+    bot._default_gyro = 0
+    bot.move(300, 50, one_time_pid= Pid(0, 0, 0))
+    actuator.rotate(1100, -360*8)
+    actuator.rotate(1100, 360*2)
 
     bot.move(400, -1000)
 

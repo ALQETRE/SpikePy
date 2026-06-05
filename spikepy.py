@@ -502,6 +502,8 @@ class Robot:
 
             # left_speed, right_speed = self._slip_correction(left_speed, right_speed, current_acc, dt)
 
+            wait(3)
+
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
