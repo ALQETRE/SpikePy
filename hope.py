@@ -216,20 +216,20 @@ def magenta_track():
 def yellow_track():
     yellow_setting = Setting(
         Pid(4, 1, 4),
-        Pid(2, 0, 5),
+        Pid(2, 1, 5),
         None,
         Pid(5, 3, 8),
         0,
-        10,
+        3,
         1
     )
     bot.set_settings(yellow_setting)
 
     bot.move(400, 400)
     bot.move(300, -80)
-    bot.turn(400, -43, bot.WHEEL_ROTATION, Direction.BACKWARD)
-    bot.move(400, 340)
-    bot.turn(400, 50)
+    bot.turn(400, -41, bot.WHEEL_ROTATION, Direction.BACKWARD)
+    bot.move(400, 380)
+    bot.turn(400, 40)
 
 
 

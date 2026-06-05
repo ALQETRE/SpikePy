@@ -590,7 +590,7 @@ class Robot:
             angle_traveled = self._angle()
 
             angle_calculated = None
-            if angle > 0:
+            if angle * direction > 0:
                 angle_calculated = abs(self.left_wheel._get_dist()/big_total_dist) * angle
             else:
                 angle_calculated = abs(self.right_wheel._get_dist()/big_total_dist) * angle
