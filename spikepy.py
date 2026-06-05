@@ -114,6 +114,8 @@ class Wheel:
         self.min_speed = 60
         self.max_speed = 1050
 
+        self.verbose = False
+
     def _run(self, speed):
         speed *= self.ratio * self._mm_to_deg
 
@@ -122,7 +124,8 @@ class Wheel:
         elif abs(speed) <= self.min_speed:
             speed = self.min_speed * (1 if speed > 0 else -1)
         elif abs(speed) > self.max_speed:
-            # print(f"Max Speed Reached ({speed})")
+            if self.verbose:
+                print(f"Max Speed Reached ({speed})")
             speed = self.max_speed * (1 if speed > 0 else -1)
 
         self.motor.run(speed)
@@ -192,6 +195,9 @@ class Robot:
 
         self.left_wheel = left_wheel
         self.right_wheel = right_wheel
+
+        self.left_wheel.verbose = self.verbose
+        self.right_wheel.verbose = self.verbose
 
         self.left_wheel.ratio *= -1 * direction # Swap direction for one wheel to drive forwards
         self.right_wheel.ratio *= direction
@@ -413,7 +419,7 @@ class Robot:
         return (acc if accelerating else 0) * (1 if (left_diff + right_diff) > 0 else -1)
 
     def _speed_scale(self, error: float) -> float:
-        clamped_angle = radians(min(abs(error), 90))
+        clamped_angle = radians(min(abs(error) * 2, 90))
         scale = cos(clamped_angle)
         return scale
     
@@ -507,7 +513,7 @@ class Robot:
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
-            dist_traveled = self._get_dist()
+            dist_traveled = self._get_dist() * speed_scale
 
             if stop_end:
                 t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)

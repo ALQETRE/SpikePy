@@ -80,7 +80,7 @@ def green_track():
     print()
     print()
 
-    bot.turn(480, 35, bot.WHEEL_ROTATION + 10, direction= Direction.BACKWARD) # Overchutes bc obstacle
+    bot.turn(480, 30, bot.WHEEL_ROTATION + 10, direction= Direction.BACKWARD) # Overchutes bc obstacle
     bot._default_gyro = 90
 
 
@@ -110,7 +110,7 @@ def orange_track():
 
     bot.reset_angle()
 
-    bot.move(600, 1880)
+    bot.move(600, 2100)
 
 def azure_track():
 
@@ -141,13 +141,11 @@ def azure_track():
 
     bot.align()
 
-    bot.turn(400, -96)
+    bot.turn(300, -91, 50, Direction.BACKWARD, acc= 400)
 
-    # move(pjecet, 465)
-    # turn(shtyrzhysta, -90, radius=WHEEL_ROTATION)
-    bot.move(400, 345)
-    bot.turn(400, 21)
-    actuator.actuate(500, -20)
+    bot.move(400, 420)
+    bot.turn(400, 17)
+    actuator.actuate(500, -30)
     bot.reset_angle()
     bot.turn(300, -140)
     bot.reset_angle()
@@ -177,10 +175,10 @@ def white_track():
 
     bot.move(300, -210)
     bot.move(400, 95)
-    bot.turn(350, 80)
+    bot.turn(300, 80)
 
     bot.move(350, 90)
-    bot.turn(300, 50, acc= 600)
+    bot.turn(300, 45, acc= 500)
 
     bot.move(300, 200)
     bot.move(300, -100)
@@ -191,13 +189,13 @@ def white_track():
 
 def magenta_track():
     magenta_setting = Setting(
-        Pid(4, 3.1, 4),
+        Pid(4, 8, 4),
         Pid(2, 0, 5),
         None,
         Pid(5, 3, 8),
         0,
         3,
-        1
+        40
     )
     bot.set_settings(magenta_setting)
 
@@ -205,11 +203,11 @@ def magenta_track():
     actuator.set_actuator(2, 50, 50)
 
     bot._default_gyro = 15
-    bot.move(350, 950)
+    bot.move(400, 900)
     bot._default_gyro = 0
-    bot.move(300, 50, one_time_pid= Pid(0, 0, 0))
+    bot.move(300, 70, one_time_pid= Pid(0, 0, 0))
     actuator.rotate(1100, -360*8)
-    actuator.rotate(1100, 360*2)
+    actuator.rotate(1100, 360*3)
 
     bot.move(400, -1000)
 
@@ -225,11 +223,11 @@ def yellow_track():
     )
     bot.set_settings(yellow_setting)
 
-    bot.move(400, 400)
+    bot.move(400, 400, one_time_pid= Pid(0, 0, 0))
     bot.move(300, -80)
     bot.turn(400, -41, bot.WHEEL_ROTATION, Direction.BACKWARD)
-    bot.move(400, 380)
-    bot.turn(400, 40)
+    bot.move(400, 340)
+    bot.turn(400, 18)
 
 
 
