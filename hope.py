@@ -233,11 +233,12 @@ color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE
 def do_track():
     check = True
     while check:
-        bot.wait_for_button()
+        bot.wait_for_button(freq= 300)
 
         # left_motor.run(-400)
         # right_motor.run(-400)
         wait(100)
+
         bot.stop()
 
         check = False
@@ -270,10 +271,8 @@ def do_track():
             check = True
 
 
-# while True:
-#     do_track()
-
-yellow_track()
+while True:
+    do_track()
 
 print("Done")
 wait(10)
