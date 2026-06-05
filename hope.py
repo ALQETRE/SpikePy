@@ -76,7 +76,7 @@ def green_track():
     actuator.actuate(1000, 0)
     print(bot._default_gyro)
 
-    bot.turn(480, -30, bot.WHEEL_ROTATION, direction= Direction.BACKWARD) # Overchutes bc obstacle
+    bot.turn(480, 30, bot.WHEEL_ROTATION, direction= Direction.BACKWARD) # Overchutes bc obstacle
     bot._default_gyro = 90
 
 
@@ -85,7 +85,7 @@ def green_track():
     print(bot._default_gyro)
 
     # bot.move(480, 50)
-    # bot.turn(250, -45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
+    # bot.turn(250, 45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
     # bot._default_gyro = 88 # krystofire88
     bot.move(480, 500, one_time_pid= Pid(6, 1, 5))
 
@@ -206,6 +206,27 @@ def magenta_track():
 
     bot.move(400, -1000)
 
+def yellow_track():
+    yellow_setting = Setting(
+        Pid(4, 1, 4),
+        Pid(2, 0, 5),
+        None,
+        Pid(5, 3, 8),
+        0,
+        10,
+        1
+    )
+    bot.set_settings(yellow_setting)
+
+    bot.move(400, 400)
+    bot.move(300, -80)
+    bot.turn(400, -43, bot.WHEEL_ROTATION, Direction.BACKWARD)
+    bot.move(400, 340)
+    bot.turn(400, 50)
+
+
+
+
 color_sensor = ColorSensor(Port.D)
 color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, Color.GREEN, Color.CYAN, Color.BLACK])
 
@@ -239,7 +260,7 @@ def do_track():
         elif track_color == Color.YELLOW:
             orange_track()
         elif track_color == Color.BLACK:
-            # yellow_track()
+            yellow_track()
             pass
 
         else:
@@ -249,9 +270,10 @@ def do_track():
             check = True
 
 
-while True:
-    do_track()
+# while True:
+#     do_track()
 
+yellow_track()
 
 print("Done")
 wait(10)

@@ -535,14 +535,14 @@ class Robot:
         big_rad = radius + (self._axle_len / 2)
 
         if radius != 0:
-            if angle > 0:
+            if angle * direction > 0:
                 org_left_speed = speed * direction
                 org_right_speed = speed * (small_rad / big_rad) * direction
             else:
                 org_left_speed = speed * (small_rad / big_rad) * direction
                 org_right_speed = speed * direction
         else:
-            if angle > 0:
+            if angle * direction > 0:
                 org_left_speed = speed
                 org_right_speed = -speed
             else:
@@ -604,7 +604,7 @@ class Robot:
         
         self.turn_pid = old_pid
 
-        self._default_gyro += angle * direction
+        self._default_gyro += angle
 
     def align(self, speed_mul: float = 2, deviation: float = 1, one_time_pid: Pid = None):
         """
