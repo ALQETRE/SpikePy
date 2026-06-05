@@ -130,7 +130,7 @@ def azure_track():
 
     actuator.actuate(500, 100)
     bot._default_gyro = 1
-    bot.move(480, 410)
+    bot.move(480, 420)
     wait(300) # Probably remove
     for i in range(4):
         bot.align()
