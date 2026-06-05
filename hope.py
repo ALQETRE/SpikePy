@@ -170,7 +170,7 @@ def white_track():
     bot.turn(150, -80)
     bot.move(480, 440)
     bot.turn(150, 80)
-    bot.align()
+    bot.align(speed_mul= 3)
     bot.move(150, 270)
 
     bot.move(300, -210)
@@ -183,8 +183,8 @@ def white_track():
     bot.move(400, 200)
     bot.move(480, -100)
     bot.turn(400, -40)
-    bot.turn(400, 80, 350)
-    bot.move(400, 500)
+    bot.turn(400, 80, 300, stop_end= False, verbose= False)
+    bot.move(400, 500,verbose= False)
 
 
 def magenta_track():

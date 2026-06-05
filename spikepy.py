@@ -543,7 +543,7 @@ class Robot:
         self.left_wheel.verbose = old_verbose
         self.right_wheel.verbose = old_verbose
 
-    def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc: int = 800, stop_end: bool = True, one_time_pid: Pid = None):
+    def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc: int = 800, stop_end: bool = True, one_time_pid: Pid = None, verbose: bool = None):
         """
         Turns the robot along an arc with a set angle in degrees (°) and radius in mm with a max speed and acceleration.
 
@@ -567,6 +567,12 @@ class Robot:
         old_pid = self.turn_pid
         if not one_time_pid is None:
             self.turn_pid = one_time_pid
+
+        old_verbose = self.verbose
+        if not verbose is None:
+            self.verbose = verbose
+            self.left_wheel.verbose = verbose
+            self.right_wheel.verbose = verbose
 
         true_angle = abs(angle) - self.turn_bias
 
@@ -647,6 +653,10 @@ class Robot:
             self.stop()
         
         self.turn_pid = old_pid
+
+        self.verbose = old_verbose
+        self.left_wheel.verbose = old_verbose
+        self.right_wheel.verbose = old_verbose
 
         self._default_gyro += angle
 
