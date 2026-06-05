@@ -130,6 +130,9 @@ class Wheel:
     def _stop(self):
         self.motor.brake()
 
+    def _free(self):
+        self.motor.stop()
+
     def _get_dist(self):
         dist = self.motor.angle() / self._mm_to_deg / self.ratio
         return dist
@@ -237,6 +240,18 @@ class Robot:
 
         self.left_wheel._stop()
         self.right_wheel._stop()
+
+        self._left_speed = 0
+        self._right_speed = 0
+        wait(200)
+
+    def free(self):
+        """
+        Lets the motors spin freely and stops the robot.
+        """
+
+        self.left_wheel._free()
+        self.right_wheel._free()
 
         self._left_speed = 0
         self._right_speed = 0

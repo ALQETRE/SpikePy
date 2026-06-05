@@ -169,21 +169,23 @@ def white_track():
     bot.reset_angle()
     
     bot.move(480, 650, one_time_pid= Pid(0, 0, 0))
-    bot.turn(200, -80)
-    bot.move(420, 430)
+    bot.turn(150, -80)
+    bot.move(420, 440)
     bot.turn(150, 80)
     bot.align()
     bot.move(150, 270)
 
     bot.move(300, -210)
-    bot.move(400, 75)
+    bot.move(400, 95)
     bot.turn(350, 80)
-    bot.move(350, 80)
-    bot.turn(350, 55)
+
+    bot.move(350, 90)
+    bot.turn(300, 50, acc= 600)
+
     bot.move(300, 200)
     bot.move(300, -100)
     bot.turn(350, -40)
-    bot.turn(350, 70, 400)
+    bot.turn(350, 80, 350)
     bot.move(480, 500)
 
 
@@ -273,6 +275,7 @@ def do_track():
             wait(100)
             bot.hub.speaker.beep(700, 400)
             check = True
+    bot.free()
 
 
 while True:
