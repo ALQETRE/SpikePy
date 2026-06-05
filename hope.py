@@ -234,7 +234,7 @@ def yellow_track():
 
 color_sensor = ColorSensor(Port.D)
 CUSTOM_MAGENTA = Color(340, 100, 100)
-CUSTOM_AZURE = Color(200, 100, 100)
+CUSTOM_AZURE = Color(190, 100, 100)
 color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, Color.GREEN, CUSTOM_AZURE, CUSTOM_MAGENTA])
 
 def do_track():
