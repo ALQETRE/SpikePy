@@ -110,7 +110,7 @@ def orange_track():
 
     bot.reset_angle()
 
-    bot.move(600, 2100)
+    bot.move(500, 2100, verbose= False)
 
 def azure_track():
 
@@ -168,23 +168,23 @@ def white_track():
     
     bot.move(480, 650, one_time_pid= Pid(0, 0, 0))
     bot.turn(150, -80)
-    bot.move(420, 440)
+    bot.move(480, 440)
     bot.turn(150, 80)
     bot.align()
     bot.move(150, 270)
 
     bot.move(300, -210)
-    bot.move(400, 95)
+    bot.move(480, 95)
     bot.turn(300, 80)
 
     bot.move(350, 90)
     bot.turn(300, 45, acc= 500)
 
-    bot.move(300, 200)
-    bot.move(300, -100)
-    bot.turn(350, -40)
-    bot.turn(350, 80, 350)
-    bot.move(480, 500)
+    bot.move(400, 200)
+    bot.move(480, -100)
+    bot.turn(400, -40)
+    bot.turn(400, 80, 350)
+    bot.move(400, 500)
 
 
 def magenta_track():
@@ -203,13 +203,13 @@ def magenta_track():
     actuator.set_actuator(2, 50, 50)
 
     bot._default_gyro = 15
-    bot.move(400, 900)
+    bot.move(480, 900)
     bot._default_gyro = 0
-    bot.move(300, 70, one_time_pid= Pid(0, 0, 0))
+    bot.move(480, 70, one_time_pid= Pid(0, 0, 0))
     actuator.rotate(1100, -360*8)
     actuator.rotate(1100, 360*3)
 
-    bot.move(400, -1000)
+    bot.move(480, -1000)
 
 def yellow_track():
     yellow_setting = Setting(
@@ -224,7 +224,7 @@ def yellow_track():
     bot.set_settings(yellow_setting)
 
     bot.move(400, 400, one_time_pid= Pid(0, 0, 0))
-    bot.move(300, -80)
+    bot.move(400, -80)
     bot.turn(400, -41, bot.WHEEL_ROTATION, Direction.BACKWARD)
     bot.move(400, 340)
     bot.turn(400, 18)

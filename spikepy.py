@@ -115,6 +115,7 @@ class Wheel:
         self.max_speed = 1050
 
         self.verbose = False
+        self.max_speed_alert = False
 
     def _run(self, speed):
         speed *= self.ratio * self._mm_to_deg
@@ -124,17 +125,21 @@ class Wheel:
         elif abs(speed) <= self.min_speed:
             speed = self.min_speed * (1 if speed > 0 else -1)
         elif abs(speed) > self.max_speed:
-            if self.verbose:
-                print(f"Max Speed Reached ({speed})")
+            if self.verbose and not self.max_speed_alert:
+                if abs(speed) > self.max_speed + 200:
+                    print(f"Max Speed Reached ({speed})")
+                self.max_speed_alert = True
             speed = self.max_speed * (1 if speed > 0 else -1)
 
         self.motor.run(speed)
 
     def _stop(self):
         self.motor.brake()
+        self.max_speed_alert = False
 
     def _free(self):
         self.motor.stop()
+        self.max_speed_alert = False
 
     def _get_dist(self):
         dist = self.motor.angle() / self._mm_to_deg / self.ratio
@@ -142,6 +147,7 @@ class Wheel:
     
     def _reset(self):
         self.motor.reset_angle(0)
+        self.max_speed_alert = False
 
 
 class Setting:
@@ -453,7 +459,7 @@ class Robot:
 
 
 
-    def move(self, speed: int, dist: int, acc: int = 900, stop_end: bool = True, one_time_pid: Pid = None):
+    def move(self, speed: int, dist: int, acc: int = 900, stop_end: bool = True, one_time_pid: Pid = None, verbose: bool = None):
         """
         Moves the robot in a straight line for a set distance in mm with a max speed and acceleration.
 
@@ -473,6 +479,12 @@ class Robot:
         old_pid = self.move_pid
         if not one_time_pid is None:
             self.move_pid = one_time_pid
+
+        old_verbose = self.verbose
+        if not verbose is None:
+            self.verbose = verbose
+            self.left_wheel.verbose = verbose
+            self.right_wheel.verbose = verbose
 
         true_dist = abs(dist) - self.move_bias
 
@@ -526,6 +538,10 @@ class Robot:
             self.stop()
         
         self.move_pid = old_pid
+
+        self.verbose = old_verbose
+        self.left_wheel.verbose = old_verbose
+        self.right_wheel.verbose = old_verbose
 
     def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, acc: int = 800, stop_end: bool = True, one_time_pid: Pid = None):
         """
