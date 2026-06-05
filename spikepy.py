@@ -772,7 +772,7 @@ class Actuator:
 
         self.motor.run_angle(speed, angle_diff*self._ratio, wait= wait)
 
-    def rotate(self, speed: int, angle: float):
+    def rotate(self, speed: int, angle: float, wait: bool = True):
         """
         Rotates the actuator at a set speed for an angle.
 
@@ -794,7 +794,7 @@ class Actuator:
             # print(f"Max Speed Reached ({speed})")
             speed = self.max_speed * (1 if speed > 0 else -1)
 
-        self.motor.run_angle(speed, angle*self._ratio)
+        self.motor.run_angle(speed, angle*self._ratio, wait= wait)
 
         angle_change = angle * (1 if speed > 0 else -1)
         angle_change %= self._total_range

@@ -13,7 +13,7 @@ left_wheel = Wheel(left_port, wheel_rad)
 right_wheel = Wheel(right_port, wheel_rad)
 actuator = Actuator(actuator_port)
 
-bot = Robot(hub, left_wheel, right_wheel, axel_len)
+bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low=7450, verbose= False)
 
 
 def blue_track():
@@ -189,13 +189,13 @@ def white_track():
 
 def magenta_track():
     magenta_setting = Setting(
-        Pid(4, 8, 4),
+        Pid(4, 12, 4),
         Pid(2, 0, 5),
         None,
         Pid(5, 3, 8),
         0,
         3,
-        50
+        60
     )
     bot.set_settings(magenta_setting)
 
@@ -203,11 +203,12 @@ def magenta_track():
     actuator.set_actuator(2, 50, 50)
 
     bot._default_gyro = 15
-    bot.move(480, 900)
+    bot.move(480, 730)
     bot._default_gyro = 0
     bot.move(480, 70, one_time_pid= Pid(0, 0, 0))
     actuator.rotate(1100, -360*8)
-    actuator.rotate(1100, 360*3)
+    actuator.rotate(1100, 360*4, wait= False)
+    wait(300)
 
     bot.move(480, -1000)
 
