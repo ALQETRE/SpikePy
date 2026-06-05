@@ -52,7 +52,7 @@ def green_track():
 
     green_setting = Setting(
         Pid(4, 1, 4),
-        Pid(3, 1, 3),
+        Pid(4, 2, 3),
         None,
         None,
         0,
@@ -65,24 +65,27 @@ def green_track():
     actuator.set_actuator(2, 150, 110)
 
 
-    bot.move(480, 720, one_time_pid= Pid(0, 0, 0))
-    bot.turn(250, -43, bot.WHEEL_ROTATION)
-    bot.turn(250, 8, bot.WHEEL_ROTATION)
-    bot.move(300, -170)
-    bot.turn(250, 90, bot.WHEEL_ROTATION)
+    bot.move(480, 750, one_time_pid= Pid(0, 0, 0))
+    bot.turn(250, -47, bot.WHEEL_ROTATION)
+    bot.turn(250, 11, bot.WHEEL_ROTATION)
+    bot.move(300, -155)
+    bot.turn(250, 85, bot.WHEEL_ROTATION)
 
     bot.move(300, 30)
-    bot.move(480, -10)
     actuator.actuate(1000, 0)
-    print(bot._default_gyro)
+    bot.move(400, -10)
 
-    bot.turn(480, 30, bot.WHEEL_ROTATION, direction= Direction.BACKWARD) # Overchutes bc obstacle
+    # bot.wait_for_button()
+    print()
+    print()
+    print()
+
+    bot.turn(480, 35, bot.WHEEL_ROTATION + 10, direction= Direction.BACKWARD) # Overchutes bc obstacle
     bot._default_gyro = 90
 
 
     actuator.actuate(1000, 100)
 
-    print(bot._default_gyro)
 
     # bot.move(480, 50)
     # bot.turn(250, 45, bot.WHEEL_ROTATION, direction= Direction.BACKWARD)
@@ -228,12 +231,14 @@ def yellow_track():
 
 
 color_sensor = ColorSensor(Port.D)
-color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, Color.GREEN, Color.CYAN, Color.BLACK])
+CUSTOM_MAGENTA = Color(340, 100, 100)
+CUSTOM_AZURE = Color(200, 100, 100)
+color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, Color.GREEN, CUSTOM_AZURE, CUSTOM_MAGENTA])
 
 def do_track():
     check = True
     while check:
-        bot.wait_for_button(freq= 300)
+        bot.wait_for_button(freq= None) # Freq 300
 
         # left_motor.run(-400)
         # right_motor.run(-400)
@@ -254,15 +259,14 @@ def do_track():
             white_track()
         elif track_color == Color.GREEN:
             green_track()
-        elif track_color == Color.CYAN:
+        elif track_color == CUSTOM_AZURE:
             azure_track()
-        elif track_color == Color.RED:
+        elif track_color == CUSTOM_MAGENTA:
             magenta_track()
         elif track_color == Color.YELLOW:
             orange_track()
-        elif track_color == Color.BLACK:
+        elif track_color == Color.RED:
             yellow_track()
-            pass
 
         else:
             bot.hub.speaker.beep(700, 400)

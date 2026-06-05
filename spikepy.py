@@ -572,13 +572,15 @@ class Robot:
 
             angle_traveled = self._angle()
 
+            angle_calculated = None
             if angle > 0:
                 angle_calculated = abs(self.left_wheel._get_dist()/big_total_dist) * angle
             else:
                 angle_calculated = abs(self.right_wheel._get_dist()/big_total_dist) * angle
 
+            wait(10)
+
             error = angle_calculated - angle_traveled
-            error *= direction
             correction = self.turn_pid._calc(error, dt) * self._axle_len / 2
 
             speed_scale = self._speed_scale(error)
