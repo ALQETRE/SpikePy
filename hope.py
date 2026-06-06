@@ -13,7 +13,7 @@ left_wheel = Wheel(left_port, wheel_rad)
 right_wheel = Wheel(right_port, wheel_rad)
 actuator = Actuator(actuator_port)
 
-bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low=7450, verbose= False)
+bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low=7450, verbose= True)
 
 
 def blue_track():
@@ -66,25 +66,20 @@ def green_track():
 
 
     bot.move(480, 750, one_time_pid= Pid(0, 0, 0))
-    bot.turn(250, -47, bot.WHEEL_ROTATION)
-    bot.turn(250, 11, bot.WHEEL_ROTATION)
-    bot.move(300, -155)
+    bot.turn(250, -50, bot.WHEEL_ROTATION)
+    bot.turn(250, 12, bot.WHEEL_ROTATION)
+    bot.move(300, -160)
     bot.turn(250, 85, bot.WHEEL_ROTATION)
 
-    bot.move(300, 30)
+    bot.move(300, 40)
     actuator.actuate(1000, 0)
     bot.move(400, -10)
 
-    # bot.wait_for_button()
-    print()
-    print()
-    print()
-
-    bot.turn(480, 30, bot.WHEEL_ROTATION + 10, direction= Direction.BACKWARD) # Overchutes bc obstacle
+    bot.turn(480, 30, bot.WHEEL_ROTATION + 30, direction= Direction.BACKWARD) # Overchutes bc obstacle
     bot._default_gyro = 90
 
 
-    actuator.actuate(1000, 100)
+    actuator.actuate(1000, 90)
 
 
     # bot.move(480, 50)
@@ -143,11 +138,11 @@ def azure_track():
 
     bot.turn(300, -91, 50, Direction.BACKWARD, acc= 400)
 
-    bot.move(400, 420)
+    bot.move(400, 410)
     bot.turn(400, 17)
-    actuator.actuate(500, -30)
+    actuator.actuate(500, -10)
     bot.reset_angle()
-    bot.turn(300, -140)
+    bot.turn(300, -160)
     bot.reset_angle()
     bot.move(500, 500)
 
@@ -207,7 +202,7 @@ def magenta_track():
     bot._default_gyro = 0
     bot.move(480, 70, one_time_pid= Pid(0, 0, 0))
     actuator.rotate(1100, -360*8)
-    actuator.rotate(1100, 360*4, wait= False)
+    actuator.rotate(1100, 360*5, wait= False)
     wait(300)
 
     bot.move(480, -1000)
@@ -234,14 +229,15 @@ def yellow_track():
 
 
 color_sensor = ColorSensor(Port.D)
-CUSTOM_MAGENTA = Color(340, 100, 100)
+CUSTOM_MAGENTA = Color(310, 100, 100)
 CUSTOM_AZURE = Color(190, 100, 100)
-color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, Color.GREEN, CUSTOM_AZURE, CUSTOM_MAGENTA])
+CUSTOM_GREEN = Color(110, 100, 90)
+color_sensor.detectable_colors([Color.RED, Color.BLUE, Color.YELLOW, Color.WHITE, CUSTOM_GREEN, CUSTOM_AZURE, CUSTOM_MAGENTA])
 
 def do_track():
     check = True
     while check:
-        bot.wait_for_button(freq= None, delay_after= 0) # Freq 300
+        bot.wait_for_button(freq= 500, delay_after= 0) # Freq 300
 
         # left_motor.run(-400)
         # right_motor.run(-400)
@@ -253,13 +249,16 @@ def do_track():
 
         track_color = color_sensor.color()
 
+        # print(track_color)
+        # return
+
         # await orange_track()
 
         if track_color == Color.BLUE:
             blue_track()
         elif track_color == Color.WHITE:
             white_track()
-        elif track_color == Color.GREEN:
+        elif track_color == CUSTOM_GREEN:
             green_track()
         elif track_color == CUSTOM_AZURE:
             azure_track()
