@@ -3,8 +3,10 @@
 ### Priority:
 - test stop_end
 - Documentation
-- Docs str on WHEEL_ROTATION
+- Docs str on EVERITHING
 - Check backwards turn (def_gyro)
+- Fix acceleration
+- Implement better move_pid application
 
 
 ### Later priority:
