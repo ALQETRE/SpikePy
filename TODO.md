@@ -4,9 +4,7 @@
 - test stop_end
 - Documentation
 - Docs str on EVERITHING
-- Check backwards turn (def_gyro)
-- Fix acceleration
-- Implement better move_pid application
+- turn stop_end condition is only for left wheel not right
 
 
 ### Later priority:
