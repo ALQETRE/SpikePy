@@ -153,7 +153,7 @@ class Wheel:
             scale = real_speed / self._speed
         self._dist += ((self.motor.angle() / self._mm_to_deg / self.ratio) - self._last_dist) * scale
         self._last_dist = self._dist
-        print(scale)
+
         return self._dist
     
     def _reset(self):
@@ -499,7 +499,10 @@ class Robot:
             dt = stopwatch.time() / 1000 / i
             i += 1
 
-            self._acceleration(speed, acc, dt, dist - dist_traveled)
+            if stop_end:
+                self._acceleration(speed, acc, dt, dist - dist_traveled)
+            else:
+                self._acceleration(speed, acc, dt)
 
             angle = self._angle()
             correction = self.move_pid._calc(-angle, dt)
@@ -518,7 +521,7 @@ class Robot:
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
-            dist_traveled = self._get_dist(real_right_speed= self._base_speed, real_left_speed= self._base_speed)
+            dist_traveled = self._get_dist(self._base_speed, self._base_speed)
 
         if stop_end:
             self.stop()
@@ -565,24 +568,13 @@ class Robot:
         left_speed = 0
         right_speed = 0
 
-        small_rad = radius - (self._axle_len / 2)
         big_rad = radius + (self._axle_len / 2)
 
-        if radius != 0:
-            if angle * direction > 0:
-                org_left_speed = speed * direction
-                org_right_speed = speed * (small_rad / big_rad) * direction
-            else:
-                org_left_speed = speed * (small_rad / big_rad) * direction
-                org_right_speed = speed * direction
-        else:
-            if angle * direction > 0:
-                org_left_speed = speed
-                org_right_speed = -speed
-            else:
-                org_left_speed = -speed
-                org_right_speed = speed
+        angular_vel = speed / big_rad * 1 if angle > 0 else -1
+        base_speed = angular_vel * radius * direction
 
+        dist_traveled = 0
+        total_dist = abs(radius * pi/180 * angle)
         big_total_dist = abs(big_rad * pi/180 * angle)
             
         self.turn_pid._reset(-self._angle())
@@ -599,7 +591,10 @@ class Robot:
             dt = stopwatch.time() / 1000 / i
             i += 1
 
-            current_acc = self._acceleration(org_left_speed, org_right_speed, acc, dt)
+            if stop_end and radius != 0:
+                self._acceleration(base_speed, acc, dt, total_dist - dist_traveled)
+            else:
+                self._acceleration(base_speed, acc, dt)
 
             angle_traveled = self._angle()
 
@@ -614,25 +609,18 @@ class Robot:
             error = angle_calculated - angle_traveled
             correction = self.turn_pid._calc(error, dt) * self._axle_len / 2
 
-            speed_scale = self._speed_scale(error)
-
-            left_speed = (self._left_speed * speed_scale) + correction
-            right_speed = (self._right_speed * speed_scale) - correction
+            left_speed, right_speed = self._get_wheel_speed(error, angular_vel + correction)
 
             # left_speed, right_speed = self._slip_correction(left_speed, right_speed, current_acc, dt)
 
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
+            print(f"Base: {self._base_speed}    Left: {left_speed}    Right: {right_speed}")
+
             angle_traveled = self._angle()
-
-            if stop_end:
-                t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, acc)
-                dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2 - self.dec_bias
-
-                if dist_to_stop > big_total_dist - abs(self.left_wheel._get_dist()):
-                    org_left_speed = 0
-                    org_right_speed = 0
+            real_left_speed, real_right_speed = self._get_wheel_speed(0, angular_vel)
+            dist_traveled = self._get_dist(real_left_speed, real_right_speed)
 
 
         if stop_end:
