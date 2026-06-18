@@ -15,9 +15,20 @@ right_wheel = Wheel(right_port, wheel_rad)
 
 bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
-# bot._default_gyro = 20
-# bot.move(480, 195*3, acc= 600)
+bot.turn_bias = 3
 
-bot.turn(400, 90, radius= 195, acc= 400, one_time_pid= Pid(0, 0, 0))
+bot.move(300, 200*4)
+bot.move(300, -200*4)
+
+bot.turn(300, 180, acc= 250)
+
+bot.move(300, -200)
+bot.move(300, -200)
+bot.turn(300, -90, acc= 400)
+bot.turn(300, 180, 200, direction= Direction.BACKWARD, acc= 300)
+bot.turn(300, -90, acc= 400)
+
+
+bot.turn(300, -360, acc= 250)
 
 print("Done")
