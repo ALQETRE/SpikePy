@@ -215,8 +215,9 @@ class Robot:
 
         self._default_gyro = 0
 
-        self._left_speed = 0
-        self._right_speed = 0
+        self._base_speed = 0
+
+        self.min_speed = 100
 
         self.dec_bias = 1 # [mm]
         self.move_bias = 0
@@ -381,48 +382,15 @@ class Robot:
     def _acc_combine(self, left: float, right: float) -> float:
         return max(abs(left), abs(right)) # TODO: Try avg
     
-    def _calc_t_from_acc(self, left_diff: int, right_diff: int, acc: int):
-        t_left = abs(left_diff) / acc
-        t_right = abs(right_diff) / acc
-
-        t = self._acc_combine(t_left, t_right)
-        
-        return t
 
     def _acceleration(self, left_speed: int, right_speed: int, acc: int, dt: float):
-        left_diff = left_speed - self._left_speed
-        right_diff = right_speed - self._right_speed
+        base_target_speed = (left_speed + right_speed) / 2
+        speed_diff = base_target_speed - self._base_speed
 
-        t = self._calc_t_from_acc(left_diff, right_diff, acc)
-        if t == 0:
-            self._left_speed = left_speed
-            self._right_speed = right_speed
-            return 0
+        self._base_speed += acc * dt
 
-        left_acc = left_diff / t
-        right_acc = right_diff / t
-
-
-        self._left_speed += left_acc * dt
-        self._right_speed += right_acc * dt
-
-        accelerating = True
-
-        if left_diff > 0 and self._left_speed > left_speed:
-            self._left_speed = left_speed
-            accelerating = False
-        elif left_diff < 0 and self._left_speed < left_speed:
-            self._left_speed = left_speed
-            accelerating = False
-
-        if right_diff > 0 and self._right_speed > right_speed:
-            self._right_speed = right_speed
-            accelerating = False
-        elif right_diff < 0 and self._right_speed < right_speed:
-            self._right_speed = right_speed
-            accelerating = False
-
-        return (acc if accelerating else 0) * (1 if (left_diff + right_diff) > 0 else -1)
+    def _stop_end(self):
+        pass
 
     def _speed_scale(self, error: float) -> float:
         clamped_angle = radians(min(abs(error) * 2, 90))
