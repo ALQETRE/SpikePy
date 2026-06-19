@@ -163,7 +163,33 @@ class Wheel:
         self.max_speed_alert = False
 
 class Setting:
-    def __init__(self, move_acc: int = None, turn_acc: int = None, move_pid: Pid = None, turn_pid: Pid = None, follow_pid: Pid = None, align_pid: Pid = None, move_bias: float = None, turn_bias: float = None, min_speed: float = None):
+    def __init__(self, move_acc: float = None, turn_acc: float = None, move_pid: Pid = None, turn_pid: Pid = None, follow_pid: Pid = None, align_pid: Pid = None, move_bias: float = None, turn_bias: float = None, min_speed: float = None):
+        """
+        This Settings class can store all configurable values for the robot,
+        it is used to calibrate only a part of the code, by applying it with ```Robot.set_setting(...)```.
+
+        Arguments:
+            move_acc (float, optional):
+                Acceleration used for ```move(...)```.
+            turn_acc (float, optional):
+                Acceleration used for ```turn(...)```.
+            move_pid (Pid, optional):
+                Pid used for ```move(...)```.
+            turn_pid (Pid, optional):
+                Pid used for ```turn(...)```.
+            follow_pid (Pid, optional):
+                Pid used for ```follow(...)```.
+            align_pid (Pid, optional):
+                Pid used for ```align(...)```.
+            move_bias (float, optional):
+                Bias used to stop ```move(...)``` set millimeters before the end to balance absolute overshoting.
+            turn_bias (float, optional):
+                Bias used to stop ```turn(...)``` set degrees before the end to balance absolute overshoting.
+            min_speed (float, optional):
+                The minimal speed the robot will slow down to.
+        """
+        
+        
         self.min_speed = min_speed
         self.move_bias = move_bias
         self.turn_bias = turn_bias
@@ -310,9 +336,15 @@ class Robot:
         self.hub.imu.reset_heading(0)
         self._default_gyro = 0
 
-    def wait_for_button(self, delay_after: int = 200, freq: int= None):
+    def wait_for_button(self, delay_after: int = 200, freq: int = None):
         """
         Waits for any side button to be pressed.
+
+        Arguments:
+            delay_after (int, optional):
+                Delay in ms that the robot will wait after the press before continuing.
+            freq (int, optional):
+                If set it will beep at that frequency untill pressed.
         """
 
         while not self.hub.buttons.pressed():
@@ -370,6 +402,14 @@ class Robot:
         # TODO: Add support for more types of pids
 
     def set_settings(self, setting : Setting):
+        """
+        Applies all settings stored in the ```Setting()``` class.
+
+        Arguments:
+            setting (Setting):
+                The setting object.
+        """
+
         if not setting.min_speed is None:
             self.min_speed = setting.min_speed
         if not setting.move_bias is None:
@@ -483,7 +523,7 @@ class Robot:
 
 
 
-    def move(self, speed: int, dist: int, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc: int = None, verbose: bool = None):
+    def move(self, speed: int, dist: int, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc: float = None, verbose: bool = None):
         """
         Moves the robot in a straight line for a set distance in mm with a max speed and acceleration.
 
@@ -492,12 +532,14 @@ class Robot:
                 The max speed of the movement in mm/s.
             dist (int):
                 The distance to travel in mm, negative means backward.
-            acc (int, optional):
-                The acceleration and deceleration in  mm/s².
             stop_end (bool, optional):
                 If ```True``` the robot will slow down and stop at the end.
             one_time_pid (Pid, optional):
                 It will use the given ```Pid()``` as the curent move_pid and then revert back.
+            one_time_acc (float, optional):
+                It will use the given acceleration as the curent move_acc and then revert back.
+            verbose (bool, optional):
+                Used to owerwrite verbose mode to ```False``` for a single move.
         """
         
         old_pid = self.move_pid
@@ -509,7 +551,7 @@ class Robot:
             self.move_acc = one_time_acc
 
         old_verbose = self.verbose
-        if not verbose is None:
+        if not verbose is None and not verbose:
             self.verbose = verbose
             self.left_wheel.verbose = verbose
             self.right_wheel.verbose = verbose
@@ -585,12 +627,14 @@ class Robot:
                 The radius of the arc to travel on in mm.
             direction (Direction, optional):
                 The direction to travel in (FORWARD/BACKWARD)
-            acc (int, optional):
-                The acceleration and deceleration in mm/s².
             stop_end (bool, optional):
                 If ```True``` the robot will slow down and stop at the end.
             one_time_pid (Pid, optional):
                 It will use the given ```Pid()``` as the curent turn_pid and then revert back.
+            one_time_acc (float, optional):
+                It will use the given acceleration as the curent turn_acc and then revert back.
+            verbose (bool, optional):
+                Used to owerwrite verbose mode to ```False``` for a single move.
         """
         
         old_pid = self.turn_pid
@@ -602,7 +646,7 @@ class Robot:
             self.turn_acc = one_time_acc
 
         old_verbose = self.verbose
-        if not verbose is None:
+        if not verbose is None and not verbose:
             self.verbose = verbose
             self.left_wheel.verbose = verbose
             self.right_wheel.verbose = verbose
@@ -700,7 +744,7 @@ class Robot:
 
         self._default_gyro += angle
 
-    def align(self, speed_mul: float = 2, deviation: float = 1, one_time_pid: Pid = None):
+    def align(self, speed_mul: float = 2, deviation: float = 1, one_time_pid: Pid = None, verbose: bool = None):
         """
         Aligns the robot to the intendet heading +- deviation.
 
@@ -711,12 +755,20 @@ class Robot:
                 Sets the max deviation to reach before ending, default is +- 1°.
             one_time_pid (Pid, optional):
                 It will use the given ```Pid()``` as the curent align_pid and then revert back.
+            verbose (bool, optional):
+                Used to owerwrite verbose mode to ```False``` for a single move.
         """
 
 
         old_pid = self.align_pid
         if not one_time_pid is None:
             self.align_pid = one_time_pid
+
+        old_verbose = self.verbose
+        if not verbose is None and not verbose:
+            self.verbose = verbose
+            self.left_wheel.verbose = verbose
+            self.right_wheel.verbose = verbose
             
         self.align_pid._reset(-self._angle())
 
@@ -747,7 +799,12 @@ class Robot:
             self.right_wheel._run(right_speed)
 
         self.stop()
+
         self.align_pid = old_pid
+
+        self.verbose = old_verbose
+        self.left_wheel.verbose = old_verbose
+        self.right_wheel.verbose = old_verbose
 
 
 
