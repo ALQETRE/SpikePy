@@ -678,13 +678,22 @@ class Robot:
                 t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, self.turn_acc)
                 dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
 
-                if dist_to_stop > big_total_dist - abs(self.left_wheel._get_dist()):
-                    if angle * direction > 0:
-                        org_left_speed = self.min_speed * direction
-                        org_right_speed = self.min_speed * (small_rad / big_rad) * direction
-                    else:
-                        org_left_speed = self.min_speed * (small_rad / big_rad) * direction
-                        org_right_speed = self.min_speed * direction
+                if angle * direction > 0:
+                    if dist_to_stop > big_total_dist - abs(self.left_wheel._get_dist(self._left_speed)):
+                        if angle * direction > 0:
+                            org_left_speed = self.min_speed * direction
+                            org_right_speed = self.min_speed * (small_rad / big_rad) * direction
+                        else:
+                            org_left_speed = self.min_speed * (small_rad / big_rad) * direction
+                            org_right_speed = self.min_speed * direction
+                else:
+                    if dist_to_stop > big_total_dist - abs(self.right_wheel._get_dist(self._right_speed)):
+                        if angle * direction > 0:
+                            org_left_speed = self.min_speed * direction
+                            org_right_speed = self.min_speed * (small_rad / big_rad) * direction
+                        else:
+                            org_left_speed = self.min_speed * (small_rad / big_rad) * direction
+                            org_right_speed = self.min_speed * direction
 
 
         if stop_end:

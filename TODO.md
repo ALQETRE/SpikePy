@@ -4,7 +4,7 @@
 - test stop_end
 - Documentation
 - Docs str on EVERITHING
-- turn stop_end condition is only for left wheel not right
+- rework turn radius logic
 
 
 ### Later priority:
