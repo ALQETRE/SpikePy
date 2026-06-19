@@ -618,20 +618,12 @@ class Robot:
         if radius < 0:
             raise ValueError("Radius is negative, for going backwards use direction.")
 
-        if radius != 0:
-            if angle * direction > 0:
-                org_left_speed = speed * direction
-                org_right_speed = speed * (small_rad / big_rad) * direction
-            else:
-                org_left_speed = speed * (small_rad / big_rad) * direction
-                org_right_speed = speed * direction
+        if angle * direction > 0:
+            org_left_speed = speed * direction
+            org_right_speed = speed * (small_rad / big_rad) * direction
         else:
-            if angle * direction > 0:
-                org_left_speed = speed
-                org_right_speed = -speed
-            else:
-                org_left_speed = -speed
-                org_right_speed = speed
+            org_left_speed = speed * (small_rad / big_rad) * direction
+            org_right_speed = speed * direction
 
         big_total_dist = abs(big_rad * pi/180 * angle)
             

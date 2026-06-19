@@ -4,7 +4,6 @@
 - test stop_end
 - Documentation
 - Docs str on EVERITHING
-- rework turn radius logic
 
 
 ### Later priority:
