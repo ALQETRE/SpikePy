@@ -3,7 +3,6 @@
 ### Priority:
 - test stop_end
 - Documentation
-- Docs str on EVERITHING
 
 
 ### Later priority:
