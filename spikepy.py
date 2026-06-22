@@ -238,7 +238,7 @@ class Robot:
         self.battery_low = battery_low
         self.battery_high = battery_high # Max of the battery is 8.4V
 
-        self.battery_check()
+        self._battery_check()
 
         self.left_wheel = left_wheel
         self.right_wheel = right_wheel
@@ -278,7 +278,7 @@ class Robot:
         self.follow_pid = Pid(0, 0, 0)
         self.align_pid = Pid(5, 3, 8)
 
-    def battery_check(self):
+    def _battery_check(self):
         battery_voltage = self.hub.battery.voltage()
         if battery_voltage > self.battery_high:
             if self.verbose:

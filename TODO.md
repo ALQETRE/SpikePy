@@ -2,7 +2,8 @@
 
 ### Priority:
 - test stop_end
-- Documentation
+- Make Actuator Docs
+- Update Robot Attributes Docs
 
 
 ### Later priority:
