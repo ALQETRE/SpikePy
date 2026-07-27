@@ -5,6 +5,7 @@
 - Make Actuator Docs
 - Update Robot Attributes Docs
 - autotune pid script
+- test by adding inertia to pid
 
 
 ### Later priority:
