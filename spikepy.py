@@ -121,6 +121,8 @@ class Wheel:
         self.verbose = False
         self.max_speed_alert = False
 
+        self._dist_reset = 0
+
     def _run(self, speed):
         speed *= self.ratio * self._mm_to_deg
 
@@ -151,13 +153,17 @@ class Wheel:
         if real_speed is not None and self._speed != 0:
             real_speed *= self.ratio * self._mm_to_deg
             scale = real_speed / self._speed
-        self._dist += ((self.motor.angle() / self._mm_to_deg / self.ratio) - self._last_dist) * scale
+        self._dist += (((self.motor.angle() - self._dist_reset) / self._mm_to_deg / self.ratio) - self._last_dist) * scale
         self._last_dist = self._dist
 
         return self._dist
     
-    def _reset(self):
-        self.motor.reset_angle(0)
+    def _reset(self, no_stop= False):
+        if no_stop:
+            self._dist_reset = self.motor.angle()
+        else:
+            self.motor.reset_angle(0)
+            self._dist_reset = 0
         self._dist = 0
         self._last_dist = 0
         self.max_speed_alert = False
@@ -204,7 +210,7 @@ class Setting:
 
 
 class Robot:
-    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD, verbose: bool = True, battery_low: int = 7380, battery_high:int = 8500):
+    def __init__(self, hub: PrimeHub, left_wheel: Wheel, right_wheel: Wheel, axle_len: int, direction: Direction = Direction.FORWARD, verbose: bool = True, battery_low: int = 7390, battery_high:int = 8500):
         """
         This is the main robot object, used to execute all movements.
 
@@ -266,6 +272,8 @@ class Robot:
 
         self.move_acc = 600
         self.turn_acc = 300
+
+        self._last_stop_end = True
 
         # self.angular_slip_threshold = 5
         # self.linear_slip_threshold = 100
@@ -438,9 +446,9 @@ class Robot:
 
         return (left_dist + right_dist) / 2
     
-    def _reset_dist(self):
-        self.left_wheel._reset()
-        self.right_wheel._reset()
+    def _reset_dist(self, no_stop= False):
+        self.left_wheel._reset(no_stop)
+        self.right_wheel._reset(no_stop)
 
     def _acc_combine(self, left: float, right: float) -> float:
         return max(abs(left), abs(right)) # TODO: Try avg
@@ -564,7 +572,12 @@ class Robot:
 
         dist_traveled = 0
         self._reset_slip()
-        self._reset_dist()
+        self._reset_dist(not self._last_stop_end)
+
+        if not stop_end:
+            avg = (self._left_speed + self._right_speed) / 2
+            self._left_speed = avg
+            self._right_speed = avg
 
         i = 1
         stopwatch = StopWatch()
@@ -606,6 +619,7 @@ class Robot:
 
         if stop_end:
             self.stop()
+        self._last_stop_end = stop_end
         
         self.move_pid = old_pid
         self.move_acc = old_acc
@@ -675,7 +689,7 @@ class Robot:
 
         angle_traveled = 0
         self._reset_slip()
-        self._reset_dist()
+        self._reset_dist(not self._last_stop_end)
 
         i = 1
         stopwatch = StopWatch()
@@ -734,6 +748,7 @@ class Robot:
 
         if stop_end:
             self.stop()
+        self._last_stop_end = stop_end
         
         self.turn_pid = old_pid
         self.turn_acc = old_acc

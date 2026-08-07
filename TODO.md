@@ -6,6 +6,8 @@
 - Update Robot Attributes Docs
 - autotune pid script
 - test by adding inertia to pid
+- add move_stop_end_bias
+- add turn_stop_end_bias
 
 
 ### Later priority:
