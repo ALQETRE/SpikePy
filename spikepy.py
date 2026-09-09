@@ -110,43 +110,43 @@ class Wheel:
         self._circ = 2 * pi * rad
         self._mm_to_deg = 1 / self._circ * 360 # To translate from  mm -> deg
 
-        self.zero_speed = 25
-        self.min_speed = 60
-        self.max_speed = 1050
+        self._zero_speed = 25
+        self._min_speed = 60
+        self._max_speed = 1050
 
         self._speed = 0
         self._dist = 0
         self._last_dist = 0
 
         self.verbose = False
-        self.max_speed_alert = False
+        self._max_speed_alert = False
 
         self._dist_reset = 0
 
     def _run(self, speed):
         speed *= self.ratio * self._mm_to_deg
 
-        if abs(speed) <= self.zero_speed:
+        if abs(speed) <= self._zero_speed:
             speed = 0
-        elif abs(speed) <= self.min_speed:
-            speed = self.min_speed * (1 if speed > 0 else -1)
-        elif abs(speed) > self.max_speed:
-            if self.verbose and not self.max_speed_alert:
-                if abs(speed) > self.max_speed + 200:
+        elif abs(speed) <= self._min_speed:
+            speed = self._min_speed * (1 if speed > 0 else -1)
+        elif abs(speed) > self._max_speed:
+            if self.verbose and not self._max_speed_alert:
+                if abs(speed) > self._max_speed + 200:
                     print(f"Max Speed Reached ({speed})")
-                self.max_speed_alert = True
-            speed = self.max_speed * (1 if speed > 0 else -1)
+                self._max_speed_alert = True
+            speed = self._max_speed * (1 if speed > 0 else -1)
 
         self.motor.run(speed)
         self._speed = speed
 
     def _stop(self):
         self.motor.brake()
-        self.max_speed_alert = False
+        self._max_speed_alert = False
 
     def _free(self):
         self.motor.stop()
-        self.max_speed_alert = False
+        self._max_speed_alert = False
 
     def _get_dist(self, real_speed= None):
         scale = 1
@@ -166,7 +166,7 @@ class Wheel:
             self._dist_reset = 0
         self._dist = 0
         self._last_dist = 0
-        self.max_speed_alert = False
+        self._max_speed_alert = False
 
 class Setting:
     def __init__(self, move_acc: float = None, turn_acc: float = None, move_pid: Pid = None, turn_pid: Pid = None, follow_pid: Pid = None, align_pid: Pid = None, move_bias: float = None, turn_bias: float = None, min_speed: float = None):
@@ -227,7 +227,7 @@ class Robot:
                 The direction the robot considers forward.
             verbose (bool, optional):
                 If true the robot will send inforamtion to the pc.
-                This is ILLEGAL in most cometitions if connected with bluetooth, so turn it off before competing, by default it is `True`.
+                This is ILLEGAL in most competitions if connected with bluetooth, so turn it off before competing, by default it is `True`.
             battery_low (int, optional):
                 Level in mV at which to toggle low level battery warning.
             battery_high (int, optional):
@@ -493,6 +493,12 @@ class Robot:
         elif right_diff < 0 and self._right_speed < right_speed:
             self._right_speed = right_speed
             accelerating = False
+
+        if (self._left_speed) < self.min_speed:
+            self._left_speed = self.min_speed * 1 if self.min_speed > 1 else -1
+
+        if (self._right_speed) < self.min_speed:
+            self._right_speed = self.min_speed * 1 if self.min_speed > 1 else -1
 
         return (acc if accelerating else 0) * (1 if (left_diff + right_diff) > 0 else -1)
 
@@ -855,7 +861,7 @@ class Actuator:
         self._total_range = ((self._range // 360) + 1) * 360
         self._opp_center = ((range / 2) + 180) % self._total_range
 
-        self.zero_speed = 25
+        self._zero_speed = 25
         self.min_speed = 60
         self.max_speed = 1050
 
@@ -878,7 +884,7 @@ class Actuator:
         self.current_angle = desired_angle
 
         speed *= abs(self._ratio)
-        if abs(speed) <= self.zero_speed:
+        if abs(speed) <= self._zero_speed:
             speed = 0
         elif abs(speed) <= self.min_speed:
             speed = self.min_speed * (1 if speed > 0 else -1)
@@ -902,7 +908,7 @@ class Actuator:
 
         speed *= abs(self._ratio)
 
-        if abs(speed) <= self.zero_speed:
+        if abs(speed) <= self._zero_speed:
             speed = 0
         elif abs(speed) <= self.min_speed:
             speed = self.min_speed * (1 if speed > 0 else -1)

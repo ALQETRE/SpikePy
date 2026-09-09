@@ -40,7 +40,7 @@ This is the main robot object, used to execute all movements.
 | axel_len | int | Distance between the center of wheels in mm. |
 | **-Optional-** |
 | direction | Direction | The direction the robot considers forward. |
-| verbose | bool | If true the robot will send inforamtion to the pc. This is ILLEGAL in most cometitions if connected with bluetooth, so turn it off before competing, by default it is `True`. |
+| verbose | bool | If true the robot will send inforamtion to the pc. This is ILLEGAL in most competitions if connected with bluetooth, so turn it off before competing, by default it is `True`. |
 | battery_low | int | Level in mV at which to toggle low level battery warning. |
 | battery_high | int | Level in mV at which to toggle high level battery warning. By default it is set 8500mV and the max of the battery is 8400mV. |
 
@@ -214,9 +214,16 @@ Waits for any side button to be pressed.
 
 ## Attributes:
 
+
 ### hub: PrimeHub
 
 The hub object.
+
+---
+
+### verbose: bool
+
+If true the robot will send inforamtion to the pc. This is ILLEGAL in most competitions if connected with bluetooth, so turn it off before competing, by default it is `True`.
 
 ---
 
@@ -232,9 +239,9 @@ The right wheel object.
 
 ---
 
-### dec_bias: int
+### min_speed: int
 
-The distance you will start to decelerate later than normal. This is to still have some speed at the final distance. Used to prevent speed dropping to 0 before reaching the desired distance. In mm.
+Prevents the robot from stalling when decelerating.
 
 ---
 
@@ -250,15 +257,51 @@ The angle the robot will stop early to account for absolute slip, in degrees (°
 
 ---
 
+### move_acc: int
+
+Acceleration used for ```move()```
+
+---
+
+### turn_acc: int
+
+Acceleration used for ```turn()```
+
+---
+
 ### move_pid: Pid
 
-The pid object used for ```move()```
+The pid object used for ```move()```, Default is ```Pid(3, 1, 3)```.
 
 ---
 
 ### turn_pid: Pid
 
-The pid object used for ```turn()```
+The pid object used for ```turn()```, Default is ```Pid(0.5, 0, 0.5)```.
+
+---
+
+### follow_pid: Pid
+
+The pid object used for ```follow()```, Default is ```Pid(0, 0, 0)```.
+
+---
+
+### align_pid: Pid
+
+The pid object used for ```align()```, Default is ```Pid(5, 3, 8)```.
+
+---
+
+### battery_low: int
+
+Level in mV at which to toggle low level battery warning.
+
+---
+
+### battery_high: int
+
+Level in mV at which to toggle high level battery warning. By default it is set 8500mV and the max of the battery is 8400mV.
 
 ---
 

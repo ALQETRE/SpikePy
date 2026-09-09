@@ -3,7 +3,6 @@
 ### Priority:
 - test stop_end
 - Make Actuator Docs
-- Update Robot Attributes Docs
 - autotune pid script
 - test by adding inertia to pid
 - add move_stop_end_bias
