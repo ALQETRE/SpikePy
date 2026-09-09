@@ -748,6 +748,10 @@ class Robot:
 
         if stop_end:
             self.stop()
+        else:
+            self._left_speed = speed * (radius / big_rad)
+            self._right_speed = speed * (radius / big_rad)
+
         self._last_stop_end = stop_end
         
         self.turn_pid = old_pid
