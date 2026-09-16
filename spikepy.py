@@ -132,7 +132,7 @@ class Wheel:
             speed = self._min_speed * (1 if speed > 0 else -1)
         elif abs(speed) > self._max_speed:
             if self.verbose and not self._max_speed_alert:
-                if abs(speed) > self._max_speed + 200:
+                if abs(speed) > self._max_speed + 100:
                     print(f"Max Speed Reached ({speed})")
                 self._max_speed_alert = True
             speed = self._max_speed * (1 if speed > 0 else -1)
@@ -148,11 +148,11 @@ class Wheel:
         self.motor.stop()
         self._max_speed_alert = False
 
-    def _get_dist(self, real_speed= None):
+    def _get_dist(self, angle= None):
         scale = 1
-        if real_speed is not None and self._speed != 0:
-            real_speed *= self.ratio * self._mm_to_deg
-            scale = real_speed / self._speed
+        if angle is not None:
+            clamped_angle = radians(min(abs(angle), 90))
+            scale = cos(clamped_angle)
         self._dist += (((self.motor.angle() - self._dist_reset) / self._mm_to_deg / self.ratio) - self._last_dist) * scale
         self._last_dist = self._dist
 
@@ -340,7 +340,7 @@ class Robot:
         """
         Resets the gyro to 0°, use when the robot is aligned.
         """
-        wait(800)
+        wait(500)
         self.hub.imu.reset_heading(0)
         self._default_gyro = 0
 
@@ -439,9 +439,9 @@ class Robot:
         if not setting.align_pid is None:
             self.align_pid = setting.align_pid
 
-    def _get_dist(self, real_left_speed: int = None, real_right_speed: int = None):
-        left_dist = self.left_wheel._get_dist(real_left_speed)
-        right_dist = self.right_wheel._get_dist(real_right_speed)
+    def _get_dist(self, angle: int = None):
+        left_dist = self.left_wheel._get_dist(angle)
+        right_dist = self.right_wheel._get_dist(angle)
         wait(3)
 
         return (left_dist + right_dist) / 2
@@ -494,12 +494,6 @@ class Robot:
             self._right_speed = right_speed
             accelerating = False
 
-        if (self._left_speed) < self.min_speed:
-            self._left_speed = self.min_speed * 1 if self.min_speed > 1 else -1
-
-        if (self._right_speed) < self.min_speed:
-            self._right_speed = self.min_speed * 1 if self.min_speed > 1 else -1
-
         return (acc if accelerating else 0) * (1 if (left_diff + right_diff) > 0 else -1)
 
     def _speed_scale(self, error: float) -> float:
@@ -537,7 +531,7 @@ class Robot:
 
 
 
-    def move(self, speed: int, dist: int, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc: float = None, verbose: bool = None):
+    def move(self, speed: int, dist: int, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc: float = None, one_time_min_speed: int = None, verbose: bool = None):
         """
         Moves the robot in a straight line for a set distance in mm with a max speed and acceleration.
 
@@ -552,6 +546,8 @@ class Robot:
                 It will use the given ```Pid()``` as the curent move_pid and then revert back.
             one_time_acc (float, optional):
                 It will use the given acceleration as the curent move_acc and then revert back.
+            one_time_min_speed (int, optional):
+                It will use the given speed as the curent min_speed and then revert back.
             verbose (bool, optional):
                 Used to owerwrite verbose mode to ```False``` for a single move.
         """
@@ -563,6 +559,10 @@ class Robot:
         old_acc = self.move_acc
         if not one_time_acc is None:
             self.move_acc = one_time_acc
+
+        old_min_speed = self.min_speed
+        if not one_time_min_speed is None:
+            self.min_speed = one_time_min_speed
 
         old_verbose = self.verbose
         if not verbose is None and not verbose:
@@ -601,11 +601,16 @@ class Robot:
             # print(f"Angle: {angle}")
             # print(f"Correction: {correction}")
             # print(f"Speed scale: {self._speed_scale(-angle)}")
+            # print(f"Left Speed (no correction): {self._left_speed}")
+            # print(f"Right Speed (no correction): {self._right_speed}")
 
             speed_scale = self._speed_scale(-angle)
 
             left_speed = (self._left_speed * speed_scale) + correction
             right_speed = (self._right_speed * speed_scale) - correction
+
+            # print(f"Left Speed: {left_speed}")
+            # print(f"Right Speed: {right_speed}")
 
             # left_speed, right_speed = self._slip_correction(left_speed, right_speed, current_acc, dt)
 
@@ -614,14 +619,15 @@ class Robot:
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
-            dist_traveled = self._get_dist(self._left_speed, self._right_speed)
+            dist_traveled = self._get_dist(angle)
 
-            if stop_end:
-                t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, self.move_acc)
-                dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
+            # print(f"Distance: {dist_traveled}")
 
-                if dist_to_stop > abs(dist - dist_traveled):
-                    speed = self.min_speed
+            t_to_stop = self._calc_t_from_acc(self.min_speed - self._left_speed, self.min_speed - self._right_speed, self.move_acc)
+            dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
+
+            if dist_to_stop > abs(dist - dist_traveled):
+                speed = self.min_speed
 
         if stop_end:
             self.stop()
@@ -629,12 +635,13 @@ class Robot:
         
         self.move_pid = old_pid
         self.move_acc = old_acc
+        self.min_speed = old_min_speed
 
         self.verbose = old_verbose
         self.left_wheel.verbose = old_verbose
         self.right_wheel.verbose = old_verbose
 
-    def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc:int = None, verbose: bool = None):
+    def turn(self, speed: int, angle: int, radius: int = 0, direction: Direction = Direction.FORWARD, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc:int = None, one_time_min_speed: int = None, verbose: bool = None):
         """
         Turns the robot along an arc with a set angle in degrees (°) and radius in mm with a max speed and acceleration.
 
@@ -653,6 +660,8 @@ class Robot:
                 It will use the given ```Pid()``` as the curent turn_pid and then revert back.
             one_time_acc (float, optional):
                 It will use the given acceleration as the curent turn_acc and then revert back.
+            one_time_min_speed (int, optional):
+                It will use the given speed as the curent min_speed and then revert back.
             verbose (bool, optional):
                 Used to owerwrite verbose mode to ```False``` for a single move.
         """
@@ -664,6 +673,10 @@ class Robot:
         old_acc = self.turn_acc
         if not one_time_acc is None:
             self.turn_acc = one_time_acc
+
+        old_min_speed = self.min_speed
+        if not one_time_min_speed is None:
+            self.min_speed = one_time_min_speed
 
         old_verbose = self.verbose
         if not verbose is None and not verbose:
@@ -711,9 +724,9 @@ class Robot:
 
             angle_calculated = None
             if angle * direction > 0:
-                angle_calculated = abs(self.left_wheel._get_dist(self._left_speed)/big_total_dist) * angle
+                angle_calculated = abs(self.left_wheel._get_dist()/big_total_dist) * angle
             else:
-                angle_calculated = abs(self.right_wheel._get_dist(self._right_speed)/big_total_dist) * angle
+                angle_calculated = abs(self.right_wheel._get_dist()/big_total_dist) * angle
 
             wait(10)
 
@@ -730,26 +743,25 @@ class Robot:
 
             angle_traveled = self._angle()
 
-            if stop_end:
-                t_to_stop = self._calc_t_from_acc(-self._left_speed, -self._right_speed, self.turn_acc)
-                dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
+            t_to_stop = self._calc_t_from_acc(self.min_speed - self._left_speed, self.min_speed - self._right_speed, self.turn_acc)
+            dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
 
-                if angle * direction > 0:
-                    if dist_to_stop > big_total_dist - abs(self.left_wheel._get_dist(self._left_speed)):
-                        if angle * direction > 0:
-                            org_left_speed = self.min_speed * direction
-                            org_right_speed = self.min_speed * (small_rad / big_rad) * direction
-                        else:
-                            org_left_speed = self.min_speed * (small_rad / big_rad) * direction
-                            org_right_speed = self.min_speed * direction
-                else:
-                    if dist_to_stop > big_total_dist - abs(self.right_wheel._get_dist(self._right_speed)):
-                        if angle * direction > 0:
-                            org_left_speed = self.min_speed * direction
-                            org_right_speed = self.min_speed * (small_rad / big_rad) * direction
-                        else:
-                            org_left_speed = self.min_speed * (small_rad / big_rad) * direction
-                            org_right_speed = self.min_speed * direction
+            if angle * direction > 0:
+                if dist_to_stop > big_total_dist - abs(self.left_wheel._get_dist()):
+                    if angle * direction > 0:
+                        org_left_speed = self.min_speed * direction
+                        org_right_speed = self.min_speed * (small_rad / big_rad) * direction
+                    else:
+                        org_left_speed = self.min_speed * (small_rad / big_rad) * direction
+                        org_right_speed = self.min_speed * direction
+            else:
+                if dist_to_stop > big_total_dist - abs(self.right_wheel._get_dist()):
+                    if angle * direction > 0:
+                        org_left_speed = self.min_speed * direction
+                        org_right_speed = self.min_speed * (small_rad / big_rad) * direction
+                    else:
+                        org_left_speed = self.min_speed * (small_rad / big_rad) * direction
+                        org_right_speed = self.min_speed * direction
 
 
         if stop_end:
@@ -762,6 +774,7 @@ class Robot:
         
         self.turn_pid = old_pid
         self.turn_acc = old_acc
+        self.min_speed = old_min_speed
 
         self.verbose = old_verbose
         self.left_wheel.verbose = old_verbose

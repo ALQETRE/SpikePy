@@ -1,12 +1,10 @@
 # Code:
 
 ### Priority:
-- test stop_end
 - Make Actuator Docs
 - autotune pid script
 - test by adding inertia to pid
-- add move_stop_end_bias
-- add turn_stop_end_bias
+- add ont_time_bias
 
 
 ### Later priority:

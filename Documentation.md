@@ -57,6 +57,7 @@ Moves the robot in a straight line for a set distance in mm with a max speed and
         stop_end: bool = True,
         one_time_pid: Pid = None,
         one_time_acc: float = None,
+        one_time_min_speed: int = None,
         verbose: bool = None
     )
 ```
@@ -70,6 +71,7 @@ Moves the robot in a straight line for a set distance in mm with a max speed and
 | stop_end | bool | If ```True``` the robot will slow down and stop at the end. |
 | one_time_pid | Pid | It will use the given ```Pid()``` as the curent move_pid and then revert back. |
 | one_time_acc | float | It will use the given acceleration as the curent move_acc and then revert back. |
+| one_time_min_speed | int | It will use the given speed as the curent min_speed and then revert back. |
 | verbose | bool | Used to owerwrite verbose mode to ```False``` for a single move. |
 
 ---
@@ -86,7 +88,8 @@ Turns the robot along an arc with a set angle in degrees (°) and radius in mm w
         direction: Direction = Direction.FORWARD,
         stop_end: bool = True,
         one_time_pid: Pid = None,
-        one_time_acc:int = None,
+        one_time_acc: float = None,
+        one_time_min_speed: int = None,
         verbose: bool = None
     )
 ```
@@ -101,6 +104,7 @@ Turns the robot along an arc with a set angle in degrees (°) and radius in mm w
 | stop_end | bool | If ```True``` the robot will slow down and stop at the end. |
 | one_time_pid | Pid | It will use the given ```Pid()``` as the curent turn_pid and then revert back. |
 | one_time_acc | float | It will use the given acceleration as the curent turn_acc and then revert back. |
+| one_time_min_speed | int | It will use the given speed as the curent min_speed and then revert back. |
 | verbose | bool | Used to owerwrite verbose mode to ```False``` for a single move. |
 
 ---
@@ -241,7 +245,7 @@ The right wheel object.
 
 ### min_speed: int
 
-Prevents the robot from stalling when decelerating.
+Sets to which point will the robot decelerate to.
 
 ---
 

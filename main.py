@@ -17,18 +17,16 @@ bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
 bot.turn_bias = 3
 
-bot.move(480, 200*4)
-bot.move(480, -200*4)
+while True:
+    bot.reset_angle()
 
-bot.turn(480, 180, one_time_acc= 250)
+    bot.turn(450, 90, 200, stop_end= False, one_time_min_speed= 300)
+    bot.move(450, 200)
 
-bot.move(480, -200)
-bot.move(480, -200)
-bot.turn(480, -90, one_time_acc= 400)
-bot.turn(480, 180, 200, direction= Direction.BACKWARD, one_time_acc= 300)
-bot.turn(480, -90, one_time_acc= 400)
+    wait(1000)
 
+    print(bot._angle())
 
-bot.turn(480, -360, one_time_acc= 250)
+    bot.wait_for_button()
 
 print("Done")
