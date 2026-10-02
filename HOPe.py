@@ -25,6 +25,47 @@ actuator_right = Actuator(right_actuator_port)
 
 bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
+def blue():
+    bot.move(400, 100)
+    bot.move(400, -100)
+
+def green():
+    bot.turn(400, 360)
+
+def do_track():
+    check = True
+    while check:
+        bot.wait_for_button(freq= None, delay_after= 50) # freq = 500
+
+        # left_motor.run(-400)
+        # right_motor.run(-400)
+        # wait(100)
+
+        bot.stop()
+
+        check = False
+
+        track_color = track_sens.color()
+
+        # print(track_color)
+        # print(color_sensor.hsv())
+        # print()
+        # return
+
+        # await orange_track()
+
+        if track_color == colors["Blue"]:
+            blue()
+        elif track_color == colors["Green"]:
+            green()
+
+        else:
+            bot.hub.speaker.beep(700, 400)
+            wait(100)
+            bot.hub.speaker.beep(700, 400)
+            check = True
+    bot.free()
 
 
-print("Done")
+while True:
+    do_track()
