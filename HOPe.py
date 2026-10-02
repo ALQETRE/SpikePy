@@ -26,8 +26,8 @@ actuator_right = Actuator(right_actuator_port)
 bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
 def blue():
-    bot.move(400, 100)
-    bot.move(400, -100)
+    bot.move(400, 100, one_time_acc= 400)
+    bot.move(400, -100, one_time_acc= 500)
 
 def green():
     bot.turn(400, 360)

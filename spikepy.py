@@ -627,7 +627,7 @@ class Robot:
             dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
 
             if dist_to_stop > abs(dist - dist_traveled):
-                speed = self.min_speed
+                speed = self.min_speed * (1 if dist > 0 else -1)
 
         if stop_end:
             self.stop()

@@ -25,9 +25,9 @@ bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
 colors = {
     "Blue": Color.BLUE,
-    "Green": Color(115, 100, 71),
-    "Lime": Color(108, 59, 100),
-    "Yellow": Color.YELLOW,
+    "Green": Color(120, 100, 80),
+    "Lime": Color(65, 100, 100),
+    "Yellow": Color(43, 100, 100),
     "Orange": Color.ORANGE,
     "White": Color.WHITE,
     "Red": Color.RED
@@ -69,8 +69,8 @@ for name, color in colors.items():
         print(real_color)
 
         bot.hub.light.off()
-        bot.hub.speaker.beep(400, 200)
         wait(200)
+        bot.hub.speaker.beep(400, 200)
         bot.hub.light.on(color)
 
         real_colors[name] = real_color
