@@ -284,7 +284,7 @@ class Robot:
         self.move_pid = Pid(3, 1, 3)
         self.turn_pid = Pid(0.5, 0, 0.5)
         self.follow_pid = Pid(0, 0, 0)
-        self.align_pid = Pid(5, 3, 1)
+        self.align_pid = Pid(5, 5, 1)
 
     def _battery_check(self):
         battery_voltage = self.hub.battery.voltage()

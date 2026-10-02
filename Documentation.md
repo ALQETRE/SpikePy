@@ -291,7 +291,7 @@ The pid object used for ```follow()```, Default is ```Pid(0, 0, 0)```.
 
 ### align_pid: Pid
 
-The pid object used for ```align()```, Default is ```Pid(5, 3, 8)```.
+The pid object used for ```align()```, Default is ```Pid(5, 5, 1)```.
 
 ---
 
