@@ -23,7 +23,7 @@ right_wheel = Wheel(right_port, wheel_rad)
 actuator_left = Actuator(left_actuator_port)
 actuator_right = Actuator(right_actuator_port)
 
-bot = Robot(hub, left_wheel, right_wheel, axel_len)
+bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low= 7400, battery_high= 8500, verbose= True)
 
 def blue():
     bot.move(400, 100, one_time_acc= 400)
