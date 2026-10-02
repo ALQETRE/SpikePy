@@ -284,7 +284,7 @@ class Robot:
         self.move_pid = Pid(3, 1, 3)
         self.turn_pid = Pid(0.5, 0, 0.5)
         self.follow_pid = Pid(0, 0, 0)
-        self.align_pid = Pid(5, 3, 8)
+        self.align_pid = Pid(5, 3, 1)
 
     def _battery_check(self):
         battery_voltage = self.hub.battery.voltage()
@@ -322,9 +322,13 @@ class Robot:
         self._right_speed = 0
         wait(200)
 
-    def _angle(self):
+    def _angle(self, absolute= False):
         angle = self.hub.imu.heading()
         angle -= self._default_gyro
+
+        if not absolute:
+            angle = ((angle + 180) % 360) - 180
+
         wait(3)
         return angle
     
@@ -704,7 +708,7 @@ class Robot:
 
         big_total_dist = abs(big_rad * pi/180 * angle)
             
-        self.turn_pid._reset(-self._angle())
+        self.turn_pid._reset(-self._angle(absolute= True))
 
         angle_traveled = 0
         self._reset_slip()
@@ -720,7 +724,7 @@ class Robot:
 
             current_acc = self._acceleration(org_left_speed, org_right_speed, self.turn_acc, dt)
 
-            angle_traveled = self._angle()
+            angle_traveled = self._angle(absolute= True)
 
             angle_calculated = None
             if angle * direction > 0:
@@ -741,7 +745,7 @@ class Robot:
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
 
-            angle_traveled = self._angle()
+            angle_traveled = self._angle(absolute= True)
 
             t_to_stop = self._calc_t_from_acc(self.min_speed - self._left_speed, self.min_speed - self._right_speed, self.turn_acc)
             dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
@@ -782,13 +786,11 @@ class Robot:
 
         self._default_gyro += angle
 
-    def align(self, speed_mul: float = 2, deviation: float = 1, one_time_pid: Pid = None, verbose: bool = None):
+    def align(self, deviation: float = 1, one_time_pid: Pid = None, verbose: bool = None):
         """
         Aligns the robot to the intendet heading +- deviation.
 
         Arguments:
-            speed_mul (float, optional):
-                Multiplies the pid output used for speed, default is 2.
             deviation (float, optional):
                 Sets the max deviation to reach before ending, default is +- 1°.
             one_time_pid (Pid, optional):
@@ -830,11 +832,12 @@ class Robot:
             # print(f"Correction: {correction}")
             # print(f"Speed scale: {self._speed_scale(-angle)}")
 
-            left_speed = correction * speed_mul
-            right_speed = -correction * speed_mul
+            left_speed = correction
+            right_speed = -correction
 
             self.left_wheel._run(left_speed)
             self.right_wheel._run(right_speed)
+
 
         self.stop()
 

@@ -32,6 +32,9 @@ def blue():
 def green():
     bot.turn(400, 360)
 
+def orange():
+    bot.align(deviation= 0.5, one_time_pid= Pid(5, 5, 1))
+
 def do_track():
     check = True
     while check:
@@ -58,6 +61,8 @@ def do_track():
             blue()
         elif track_color == colors["Green"]:
             green()
+        elif track_color == colors["Orange"]:
+            orange()
 
         else:
             bot.hub.speaker.beep(700, 400)

@@ -115,7 +115,6 @@ Aligns the robot to the intendet heading +- deviation.
 
 ```python
     def align(
-        speed_mul: float = 2,
         deviation: float = 1,
         one_time_pid: Pid = None,
         verbose: bool = None
@@ -124,7 +123,6 @@ Aligns the robot to the intendet heading +- deviation.
 | Name | Type | Desc |
 | -- | -- | -- |
 | **-Optional-** |
-| speed_mul | float | Multiplies the pid output used for speed, default is 2. |
 | deviation | float | Sets the max deviation to reach before ending, default is +- 1°. |
 | one_time_pid | Pid | It will use the given ```Pid()``` as the curent align_pid and then revert back. |
 | verbose | bool | Used to owerwrite verbose mode to ```False``` for a single move. |
