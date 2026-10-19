@@ -25,16 +25,52 @@ actuator_right = Actuator(right_actuator_port)
 
 bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low= 7400, battery_high= 8500, verbose= True)
 
-def blue():
-    bot.move(400, 100, one_time_acc= 400)
-    bot.move(400, -100, one_time_acc= 500)
 
-def green():
-    bot.turn(400, 360)
+def lime():
+    lime_settings = Setting(
+        move_acc= None,
+        turn_acc= None,
+        move_pid= None,
+        turn_pid= None,
+        align_pid= None,
+        move_bias= None,
+        turn_bias= None,
+        min_speed= None
+    )
+    bot.set_settings(lime_settings)
 
-def orange():
-    bot.align(deviation= 0.5, one_time_pid= Pid(5, 5, 1))
+    actuator_right.set_actuator(2.8, 90, 0)
 
+    bot.reset_angle()
+
+    actuator_right.actuate(500, 100, False)
+    bot.move(450, 420)
+
+    actuator_right.actuate(100, -10, False)
+    bot.move(260, 120, one_time_acc= 400)
+
+    bot.move(480, -150, one_time_acc= 1000)
+
+    actuator_right.actuate(500, 100, False)
+    bot.move(300, -400)
+
+
+def template():
+    _settings = Setting(
+        move_acc= None,
+        turn_acc= None,
+        move_pid= None,
+        turn_pid= None,
+        follow_pid= None,
+        align_pid= None,
+        move_bias= None,
+        turn_bias= None,
+        min_speed= None
+    )
+    bot.set_settings(_settings)
+
+    bot.reset_angle()
+    
 def do_track():
     check = True
     while check:
@@ -57,13 +93,11 @@ def do_track():
 
         # await orange_track()
 
-        if track_color == colors["Blue"]:
-            blue()
+        if track_color == colors["Lime"]:
+            lime()
         elif track_color == colors["Green"]:
-            green()
-        elif track_color == colors["Orange"]:
-            orange()
-
+            # green()
+            pass
         else:
             bot.hub.speaker.beep(700, 400)
             wait(100)
