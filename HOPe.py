@@ -23,19 +23,19 @@ right_wheel = Wheel(right_port, wheel_rad)
 actuator_left = Actuator(left_actuator_port)
 actuator_right = Actuator(right_actuator_port)
 
-bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low= 7400, battery_high= 8500, verbose= True)
+bot = Robot(hub, left_wheel, right_wheel, axel_len, battery_low= 7450, battery_high= 8500, verbose= True)
 
 
 def lime():
     lime_settings = Setting(
-        move_acc= None,
-        turn_acc= None,
-        move_pid= None,
-        turn_pid= None,
-        align_pid= None,
-        move_bias= None,
-        turn_bias= None,
-        min_speed= None
+        move_acc= 600,
+        turn_acc= 300,
+        move_pid= Pid(3, 1, 3),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
     )
     bot.set_settings(lime_settings)
 
@@ -54,18 +54,46 @@ def lime():
     actuator_right.actuate(500, 100, False)
     bot.move(300, -400)
 
+def blue():
+    blue_settings = Setting(
+        move_acc= 400,
+        turn_acc= 300,
+        move_pid= Pid(2, 0, 0.5),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
+    )
+    bot.set_settings(blue_settings)
+
+    actuator_left.set_actuator(-2.8, 60, -35)
+    actuator_right.set_actuator(2.8, 360, 32)
+
+    bot.reset_angle()
+
+    actuator_left.actuate(300, 100, False)
+    actuator_right.actuate(300, 0, False)
+
+    bot.move(350, 465, one_time_acc= 200)
+
+    bot.move(350, -60)
+    bot.turn(300, 90)
+    bot.move(350, 300)
+    bot.turn(300, -105, bot.WHEEL_ROTATION)
+    bot.move(350, 470)
+    bot.turn(300, 15, bot.WHEEL_ROTATION)
 
 def template():
     _settings = Setting(
-        move_acc= None,
-        turn_acc= None,
-        move_pid= None,
-        turn_pid= None,
-        follow_pid= None,
-        align_pid= None,
-        move_bias= None,
-        turn_bias= None,
-        min_speed= None
+        move_acc= 600,
+        turn_acc= 300,
+        move_pid= Pid(3, 1, 3),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
     )
     bot.set_settings(_settings)
 
@@ -95,9 +123,8 @@ def do_track():
 
         if track_color == colors["Lime"]:
             lime()
-        elif track_color == colors["Green"]:
-            # green()
-            pass
+        elif track_color == colors["Blue"]:
+            blue()
         else:
             bot.hub.speaker.beep(700, 400)
             wait(100)
