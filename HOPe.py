@@ -100,11 +100,44 @@ def blue():
     bot.turn(300, 45)
     bot.move(350, -700)
 
+def orange():
+    orange_settings = Setting(
+        move_acc= 350,
+        turn_acc= 200,
+        move_pid= Pid(3, 1, 3),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
+    )
+    bot.set_settings(orange_settings)
+
+    actuator_right.set_actuator(2.88, 55, 0)
+    actuator_left.set_actuator(1.67, 25, 0)
+
+    bot.reset_angle()
+
+    bot.move(350, 85)
+
+    bot.turn(300, -45)
+
+    bot.move(300, 370)
+
+    actuator_right.actuate(300, 100)
+
+    bot.turn(300, -80, radius= bot.WHEEL_ROTATION)
+    bot.move(350, 150)
+    bot.turn(300, 90, radius= bot.WHEEL_ROTATION)
+
+    bot.move(350, 200)
+
+
 
 def template():
     _settings = Setting(
-        move_acc= 600,
-        turn_acc= 300,
+        move_acc= 350,
+        turn_acc= 200,
         move_pid= Pid(3, 1, 3),
         turn_pid= Pid(0.5, 0, 0.5),
         align_pid= Pid(5, 5, 1),
@@ -142,6 +175,8 @@ def do_track():
             lime()
         elif track_color == colors["Blue"]:
             blue()
+        elif track_color == colors["Orange"]:
+            orange()
         else:
             bot.hub.speaker.beep(700, 400)
             wait(100)
