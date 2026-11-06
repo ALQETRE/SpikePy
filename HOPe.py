@@ -56,9 +56,9 @@ def lime():
 
 def blue():
     blue_settings = Setting(
-        move_acc= 400,
-        turn_acc= 250,
-        move_pid= Pid(2, 0, 0.5),
+        move_acc= 300,
+        turn_acc= 200,
+        move_pid= Pid(0.5, 0, 0.5),
         turn_pid= Pid(0.5, 0, 1.5),
         align_pid= Pid(5, 5, 1),
         move_bias= 0,
@@ -68,27 +68,27 @@ def blue():
     bot.set_settings(blue_settings)
 
     actuator_left.set_actuator(-2.8, 60, -35)
-    actuator_right.set_actuator(2.8, 360, 32)
-
+    actuator_right.set_actuator(1.67, 360, 125)
+    
     bot.reset_angle()
 
     actuator_left.actuate(300, 100, False)
-    actuator_right.actuate(300, -15, False)
+    actuator_right.actuate(300, 6, False)
 
     bot.move(350, 465, one_time_acc= 200)
 
     bot.move(350, -60)
     bot.turn(300, 90)
-    bot.move(350, 195)
+    bot.move(300, 192)
     bot.turn(300, -90)
-    bot.move(350, 465)
+    bot.move(350, 512)
 
     # bot.align()
 
-    actuator_right.actuate(300, 70, False)
-    bot.move(350, 40)
-
-    wait(1000)
+    actuator_right.actuate(300, 140, True)
+    
+    # bot.move(350, 25)
+    # wait(1000)
 
     bot.move(350, -95)
     bot.turn(300, -45)
