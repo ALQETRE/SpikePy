@@ -113,24 +113,37 @@ def orange():
     )
     bot.set_settings(orange_settings)
 
-    actuator_right.set_actuator(2.88, 55, 0)
-    actuator_left.set_actuator(1.67, 25, 0)
+    actuator_right.set_actuator(2.88, 65, 0)
+    actuator_left.set_actuator(1.67, 65, 0)
 
     bot.reset_angle()
 
-    bot.move(350, 85)
+    bot.move(350, 75)
 
     bot.turn(300, -45)
 
-    bot.move(300, 370)
+    bot.move(280, 370)
 
     actuator_right.actuate(300, 100)
 
+    wait(1000)
+
+    actuator_left.actuate(100, 100)
+
     bot.turn(300, -80, radius= bot.WHEEL_ROTATION)
-    bot.move(350, 150)
+    bot.move(340, 170)
     bot.turn(300, 90, radius= bot.WHEEL_ROTATION)
 
-    bot.move(350, 200)
+    bot.move(350, 50)
+    bot.turn(350, 120)
+    bot.move(350, -620)
+    actuator_left.actuate(200, 0, False)
+    bot.turn(350, -45)
+    bot.move(350, 105)
+    actuator_left.actuate(200, 100)
+    wait(2000)
+    bot.move(100, -400)
+
 
 
 
