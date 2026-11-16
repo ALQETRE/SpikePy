@@ -143,12 +143,59 @@ def orange():
     bot.move(360, -620)
     actuator_left.actuate(200, 0, False)
     bot.turn(350, -45)
-    bot.move(350, 130)
+    bot.move(350, 125)
     actuator_left.actuate(200, 130, False)
     wait(1000)
     bot.move(100, -400)
 
     actuator_left.motor.brake()
+
+
+
+def green():
+    green_settings = Setting(
+        move_acc= 350,
+        turn_acc= 200,
+        move_pid= Pid(3, 1, 3),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
+    )
+    bot.set_settings(green_settings)
+
+    actuator_left.set_actuator(-2.88, 40, 0)
+
+    bot.reset_angle()
+
+    bot.move(300, 770)
+    
+    actuator_left.actuate(200, 100)
+
+    bot.move(100, -100)
+    bot.move(100, 10)
+    actuator_left.actuate(200, 0)
+
+    bot.move(300, -200)
+
+    bot.turn(200, -45)
+
+    bot.move(280, 380)
+
+    bot.turn(200, -90)
+
+    bot.move(100, -130)
+
+    bot.move(300, 130)
+    bot.turn(200, -90)
+    bot.move(300, 500)
+
+    bot.turn(200, -135)
+
+    bot.move(300, -370)
+
+
 
 
 
@@ -196,6 +243,8 @@ def do_track():
             blue()
         elif track_color == colors["Orange"]:
             orange()
+        elif track_color == colors['Green']:
+            green()
         else:
             bot.hub.speaker.beep(700, 400)
             wait(100)
