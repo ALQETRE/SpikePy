@@ -66,7 +66,6 @@ Moves the robot in a straight line for a set distance in mm with a max speed and
 | -- | -- | -- |
 | speed | int | The max speed of the movement in mm/s. |
 | dist | int | The distance to travel in mm, negative means backward. |
-| acc | int | The acceleration and deceleration in  mm/s². |
 | **-Optional-** |
 | stop_end | bool | If ```True``` the robot will slow down and stop at the end. |
 | one_time_pid | Pid | It will use the given ```Pid()``` as the curent move_pid and then revert back. |
@@ -125,6 +124,39 @@ Aligns the robot to the intendet heading +- deviation.
 | **-Optional-** |
 | deviation | float | Sets the max deviation to reach before ending, default is +- 1°. |
 | one_time_pid | Pid | It will use the given ```Pid()``` as the curent align_pid and then revert back. |
+| verbose | bool | Used to owerwrite verbose mode to ```False``` for a single move. |
+
+---
+
+### follow()
+
+Moves the robot in a straight line for a set distance in mm with a max speed and acceleration.
+
+```python
+    def follow(
+        speed: int,
+        dist: int,
+        follow_func: function,
+        follow_func_args: list = [],
+        stop_end: bool = True,
+        one_time_pid: Pid = None,
+        one_time_acc: float = None,
+        one_time_min_speed: int = None,
+        verbose: bool = None
+    )
+```
+
+| Name | Type | Desc |
+| -- | -- | -- |
+| speed | int | The max speed of the movement in mm/s. |
+| dist | int | The distance to travel in mm, negative means backward. |
+| follow_func | function | A function that is ran each frame and used as error for pid, the robot will try to make it 0. |
+| **-Optional-** |
+| follow_func_args | list | List of positional arguments passed into follow_func. |
+| stop_end | bool | If ```True``` the robot will slow down and stop at the end. |
+| one_time_pid | Pid | It will use the given ```Pid()``` as the curent move_pid and then revert back. |
+| one_time_acc | float | It will use the given acceleration as the curent move_acc and then revert back. |
+| one_time_min_speed | int | It will use the given speed as the curent min_speed and then revert back. |
 | verbose | bool | Used to owerwrite verbose mode to ```False``` for a single move. |
 
 ---
@@ -271,6 +303,12 @@ Acceleration used for ```turn()```
 
 ---
 
+### follow_acc: int
+
+Acceleration used for ```follow()```
+
+---
+
 ### move_pid: Pid
 
 The pid object used for ```move()```, Default is ```Pid(3, 1, 3)```.
@@ -372,6 +410,7 @@ This Settings class can store all configurable values for the robot, it is used 
     def Setting(
         move_acc: float = None,
         turn_acc: float = None,
+        follow_acc: float = None,
         move_pid: Pid = None,
         turn_pid: Pid = None,
         follow_pid: Pid = None,

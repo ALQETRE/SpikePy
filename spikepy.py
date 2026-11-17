@@ -169,7 +169,7 @@ class Wheel:
         self._max_speed_alert = False
 
 class Setting:
-    def __init__(self, move_acc: float = None, turn_acc: float = None, move_pid: Pid = None, turn_pid: Pid = None, follow_pid: Pid = None, align_pid: Pid = None, move_bias: float = None, turn_bias: float = None, min_speed: float = None):
+    def __init__(self, move_acc: float = None, turn_acc: float = None, follow_acc: float = None, move_pid: Pid = None, turn_pid: Pid = None, follow_pid: Pid = None, align_pid: Pid = None, move_bias: float = None, turn_bias: float = None, min_speed: float = None):
         """
         This Settings class can store all configurable values for the robot,
         it is used to calibrate only a part of the code, by applying it with ```Robot.set_setting(...)```.
@@ -202,6 +202,7 @@ class Setting:
 
         self.move_acc = move_acc
         self.turn_acc = turn_acc
+        self.follow_acc = follow_acc
 
         self.move_pid = move_pid
         self.turn_pid = turn_pid
@@ -272,6 +273,7 @@ class Robot:
 
         self.move_acc = 600
         self.turn_acc = 300
+        self.follow_acc = 500
 
         self._last_stop_end = True
 
@@ -433,6 +435,8 @@ class Robot:
             self.move_acc = setting.move_acc
         if not setting.turn_acc is None:
             self.turn_acc = setting.turn_acc
+        if not setting.follow_acc is None:
+            self.follow_acc = setting.follow_acc
 
         if not setting.move_pid is None:
             self.move_pid = setting.move_pid
@@ -842,6 +846,119 @@ class Robot:
         self.stop()
 
         self.align_pid = old_pid
+
+        self.verbose = old_verbose
+        self.left_wheel.verbose = old_verbose
+        self.right_wheel.verbose = old_verbose
+
+    def follow(self, speed: int, dist: int, follow_func: function, follow_func_args: list = [], stop_end: bool = True, one_time_pid: Pid = None, one_time_acc: float = None, one_time_min_speed: int = None, verbose: bool = None):
+        """
+        Moves the robot based of the output of follow_func for a set distance in mm with a max speed and acceleration.
+
+        Arguments:
+            speed (int):
+                The max speed of the movement in mm/s.
+            dist (int):
+                The distance to travel in mm, negative means backward.
+            follow_func (function):
+                A function that is ran each frame and used as error for pid, the robot will try to make it 0.
+            follow_func_args: (list, optional).
+                List of positional arguments passed into follow_func.
+            stop_end (bool, optional):
+                If ```True``` the robot will slow down and stop at the end.
+            one_time_pid (Pid, optional):
+                It will use the given ```Pid()``` as the curent follow_pid and then revert back.
+            one_time_acc (float, optional):
+                It will use the given acceleration as the curent follow_acc and then revert back.
+            one_time_min_speed (int, optional):
+                It will use the given speed as the curent min_speed and then revert back.
+            verbose (bool, optional):
+                Used to owerwrite verbose mode to ```False``` for a single move.
+        """
+        
+        old_pid = self.follow_pid
+        if not one_time_pid is None:
+            self.follow_pid = one_time_pid
+
+        old_acc = self.follow_acc
+        if not one_time_acc is None:
+            self.follow_acc = one_time_acc
+
+        old_min_speed = self.min_speed
+        if not one_time_min_speed is None:
+            self.min_speed = one_time_min_speed
+
+        old_verbose = self.verbose
+        if not verbose is None and not verbose:
+            self.verbose = verbose
+            self.left_wheel.verbose = verbose
+            self.right_wheel.verbose = verbose
+
+        true_dist = abs(dist) - self.move_bias
+
+        self.follow_pid._reset(follow_func(*follow_func_args))
+
+        speed *= 1 if dist > 0 else -1
+
+        dist_traveled = 0
+        self._reset_slip()
+        self._reset_dist(not self._last_stop_end)
+
+        if not stop_end:
+            avg = (self._left_speed + self._right_speed) / 2
+            self._left_speed = avg
+            self._right_speed = avg
+
+        i = 1
+        stopwatch = StopWatch()
+
+        while abs(dist_traveled) < true_dist:
+
+            dt = stopwatch.time() / 1000 / i
+            i += 1
+
+            self._acceleration(speed, speed, self.move_acc, dt)
+
+            correction = self.move_pid._calc(follow_func(*follow_func_args), dt) * self._axle_len / 2
+
+            # print(f"Angle: {angle}")
+            # print(f"Correction: {correction}")
+            # print(f"Speed scale: {self._speed_scale(-angle)}")
+            # print(f"Left Speed (no correction): {self._left_speed}")
+            # print(f"Right Speed (no correction): {self._right_speed}")
+
+            speed_scale = self._speed_scale(follow_func(*follow_func_args))
+
+            left_speed = (self._left_speed * speed_scale) + correction
+            right_speed = (self._right_speed * speed_scale) - correction
+
+            # print(f"Left Speed: {left_speed}")
+            # print(f"Right Speed: {right_speed}")
+
+            # left_speed, right_speed = self._slip_correction(left_speed, right_speed, current_acc, dt)
+
+            wait(3)
+
+            self.left_wheel._run(left_speed)
+            self.right_wheel._run(right_speed)
+
+            dist_traveled = self._get_dist()
+
+            # print(f"Distance: {dist_traveled}")
+
+            t_to_stop = self._calc_t_from_acc(self.min_speed - self._left_speed, self.min_speed - self._right_speed, self.move_acc)
+            dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
+
+            if dist_to_stop > abs(dist - dist_traveled):
+                speed = self.min_speed * (1 if dist > 0 else -1)
+
+        if stop_end:
+            self.stop()
+        self._last_stop_end = stop_end
+        
+        self.follow_pid = old_pid
+        self.follow_acc = old_acc
+        self.min_speed = old_min_speed
 
         self.verbose = old_verbose
         self.left_wheel.verbose = old_verbose
