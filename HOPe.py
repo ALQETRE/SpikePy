@@ -169,15 +169,15 @@ def green():
 
     bot.reset_angle()
 
-    bot.move(300, 770)
+    bot.move(300, 750)
     
     actuator_left.actuate(200, 100)
 
     bot.move(100, -100)
-    bot.move(100, 10)
+    bot.move(100, 20)
     actuator_left.actuate(200, 0)
 
-    bot.move(300, -200)
+    bot.move(300, -150)
 
     bot.turn(200, -45)
 
@@ -185,9 +185,9 @@ def green():
 
     bot.turn(200, -90)
 
-    bot.move(100, -130)
+    bot.move(100, -105)
 
-    bot.move(300, 130)
+    bot.move(300, 120)
     bot.turn(200, -90)
     bot.move(300, 500)
 
