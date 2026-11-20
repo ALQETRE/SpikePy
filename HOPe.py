@@ -197,6 +197,39 @@ def green():
 
 
 
+def red():
+    red_settings = Setting(
+        move_acc= 350,
+        turn_acc= 200,
+        move_pid= Pid(3, 1, 3),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
+    )
+    bot.set_settings(red_settings)
+
+    actuator_left.set_actuator(-2.88, 90, -15)
+    actuator_right.set_actuator(2.88, 40, -20)
+
+    bot.reset_angle()
+
+    actuator_left.actuate(400, 0)
+    actuator_right.actuate(400, 0)
+
+    # bot.wait_for_button()
+
+    # actuator_right.actuate(400, 100)
+    # bot.move(300, -100)
+    # actuator_right.actuate(400, 0)
+
+    bot.wait_for_button()
+
+    actuator_left.actuate(300, 100)
+
+    bot.wait_for_button()
+
 
 
 
@@ -243,8 +276,10 @@ def do_track():
             blue()
         elif track_color == colors["Orange"]:
             orange()
-        elif track_color == colors['Green']:
+        elif track_color == colors["Green"]:
             green()
+        elif track_color == colors["Red"]:
+            red()
         else:
             bot.hub.speaker.beep(700, 400)
             wait(100)
