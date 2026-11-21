@@ -15,18 +15,35 @@ right_wheel = Wheel(right_port, wheel_rad)
 
 bot = Robot(hub, left_wheel, right_wheel, axel_len)
 
-bot.turn_bias = 3
+dist_sens = UltrasonicSensor(Port.D)
 
-while True:
-    bot.reset_angle()
+def until_wall(bot, target_dist):
+    dist = dist_sens.distance()
+    return dist - target_dist
 
-    bot.turn(450, 90, 200, stop_end= False, one_time_min_speed= 300)
-    bot.move(450, 200)
+def until_under(bot, aprox_dist):
+    dist = dist_sens.distance()
+    under = dist < 100 and dist > 1
 
-    wait(1000)
+    if under: 
+        return 0
+    else:
+        return max(aprox_dist - abs(bot._dist_traveled), 10)
 
-    print(bot._angle())
+def until_radar(bot, aprox_angle):
+    dist = dist_sens.distance()
+    under = dist < 100 and dist > 1
 
-    bot.wait_for_button()
+    if under: 
+        return 0
+    else:
+        return max(((aprox_angle - abs(bot._angle_traveled)) / 180) * pi * bot._big_rad, 10)
+
+bot.until(200, bot.turn_loop, until_radar, bot.turn_pid, bot.turn_acc, stop_func_args= [180])
+
+
+wait(500)
+
+print(dist_sens.distance())
 
 print("Done")
