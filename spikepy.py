@@ -503,6 +503,9 @@ class Robot:
         scale = cos(clamped_angle)
         return scale
 
+    def get_dist_to_target_from_angle(self, angle_to_target):
+        return (angle_to_target / 180) * pi * self._big_rad
+
 
 
     def move(self, speed: int, dist: int, stop_end: bool = True, one_time_pid: Pid = None, one_time_acc: float = None, one_time_min_speed: int = None, verbose: bool = None):
@@ -552,7 +555,7 @@ class Robot:
 
         self._stop_end = stop_end
 
-        self._dist_traveled = 0
+        self.dist_traveled = 0
         dist_to_target = true_dist
 
 
@@ -572,7 +575,7 @@ class Robot:
 
             self.move_loop(dist_to_target, dt, self.move_pid, self.move_acc)
 
-            dist_to_target = true_dist - abs(self._dist_traveled)
+            dist_to_target = true_dist - abs(self.dist_traveled)
 
         if self._stop_end:
             self.stop()
@@ -612,7 +615,7 @@ class Robot:
         self.left_wheel._run(left_speed)
         self.right_wheel._run(right_speed)
 
-        self._dist_traveled = self._get_dist(angle)
+        self.dist_traveled = self._get_dist(angle)
 
         # print(f"Distance: {dist_traveled}")
 
@@ -672,7 +675,7 @@ class Robot:
             self.right_wheel.verbose = verbose
 
         true_angle = abs(angle) - self.turn_bias
-        self._angle_traveled = 0
+        self.angle_traveled = 0
         dist_to_target = true_angle
 
         self._direction = direction
@@ -706,7 +709,7 @@ class Robot:
 
             self.turn_loop(dist_to_target, dt, self.turn_pid, self.turn_acc)
 
-            dist_to_target = ((true_angle - abs(self._angle_traveled)) / 180) * pi * self._big_rad
+            dist_to_target = self.get_dist_to_target_from_angle(true_angle - abs(self.angle_traveled))
 
 
         if self._stop_end:
@@ -730,7 +733,7 @@ class Robot:
     def turn_loop(self, dist_to_target, dt, pid, acc):
         self._acceleration(self._org_left_speed, self._org_right_speed, acc, dt)
 
-        self._angle_traveled = self._angle(absolute= True)
+        self.angle_traveled = self._angle(absolute= True)
 
         angle_calculated = None
         if self._turn_angle * self._direction > 0:
@@ -740,7 +743,7 @@ class Robot:
 
         wait(10)
 
-        error = angle_calculated - self._angle_traveled
+        error = angle_calculated - self.angle_traveled
         correction = pid._calc(error, dt) * self._axle_len / 2
 
         left_speed = self._left_speed + correction
@@ -750,7 +753,7 @@ class Robot:
         self.left_wheel._run(left_speed)
         self.right_wheel._run(right_speed)
 
-        self._angle_traveled = self._angle(absolute= True)
+        self.angle_traveled = self._angle(absolute= True)
 
         if self._stop_end:
             t_to_stop = self._calc_t_from_acc(self._org_left_speed, self._org_right_speed, acc)
@@ -983,8 +986,8 @@ class Robot:
         self._speed = speed
 
         self._stop_end = stop_end
-        self._dist_traveled = 0
-        self._angle_traveled = 0
+        self.dist_traveled = 0
+        self.angle_traveled = 0
 
         self._direction = direction
         self._turn_angle = 1

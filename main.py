@@ -28,7 +28,7 @@ def until_under(bot, aprox_dist):
     if under: 
         return 0
     else:
-        return max(aprox_dist - abs(bot._dist_traveled), 10)
+        return max(aprox_dist - abs(bot.dist_traveled), 10)
 
 def until_radar(bot, aprox_angle):
     dist = dist_sens.distance()
@@ -37,9 +37,18 @@ def until_radar(bot, aprox_angle):
     if under: 
         return 0
     else:
-        return max(((aprox_angle - abs(bot._angle_traveled)) / 180) * pi * bot._big_rad, 10)
+        return max(bot.get_dist_to_target_from_angle(aprox_angle - abs(bot.angle_traveled)), 10)
+
 
 bot.until(200, bot.turn_loop, until_radar, bot.turn_pid, bot.turn_acc, stop_func_args= [180])
+
+bot.wait_for_button()
+
+bot.until(400, bot.move_loop, until_under, bot.move_pid, bot.move_acc, [200])
+
+bot.wait_for_button()
+
+bot.until(400, bot.move_loop, until_wall, bot.move_pid, bot.move_acc, [120])
 
 
 wait(500)
