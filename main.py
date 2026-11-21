@@ -43,12 +43,14 @@ def until_radar(bot, aprox_angle):
 bot.until(200, bot.turn_loop, until_radar, bot.turn_pid, bot.turn_acc, stop_func_args= [180])
 
 bot.wait_for_button()
+bot.reset_angle()
 
-bot.until(400, bot.move_loop, until_under, bot.move_pid, bot.move_acc, [200])
+bot.until(-400, bot.move_loop, until_under, bot.move_pid, bot.move_acc, [200])
 
 bot.wait_for_button()
+bot.reset_angle()
 
-bot.until(400, bot.move_loop, until_wall, bot.move_pid, bot.move_acc, [120])
+bot.until(-400, bot.move_loop, until_wall, bot.move_pid, bot.move_acc, [120])
 
 
 wait(500)
