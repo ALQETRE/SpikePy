@@ -548,17 +548,15 @@ class Robot:
             self.right_wheel.verbose = verbose
 
         true_dist = abs(dist) - self.move_bias
-
-        self.move_pid._reset(-self._angle())
-
-        self._speed = speed * (1 if dist > 0 else -1)
-
-        self._stop_end = stop_end
-
         self.dist_traveled = 0
         dist_to_target = true_dist
 
 
+        self._speed = speed * (1 if dist > 0 else -1)
+        self._stop_end = stop_end
+
+
+        self.move_pid._reset(-self._angle())
         self._reset_dist(not self._last_stop_end)
 
         if not self._last_stop_end:
@@ -676,11 +674,10 @@ class Robot:
 
         true_angle = abs(angle) - self.turn_bias
         self.angle_traveled = 0
-        dist_to_target = true_angle
 
+        self._stop_end = stop_end
         self._direction = direction
         self._turn_angle = angle
-        self._stop_end = stop_end
 
         small_rad = radius - (self._axle_len / 2)
         self._big_rad = radius + (self._axle_len / 2)
@@ -695,9 +692,11 @@ class Robot:
         else:
             self._org_left_speed = speed * self._turn_ratio * direction
             self._org_right_speed = speed * direction
-            
-        self.turn_pid._reset(-self._angle(absolute= True))
 
+        dist_to_target = self.get_dist_to_target_from_angle(true_angle)
+
+        
+        self.turn_pid._reset(-self._angle(absolute= True))
         self._reset_dist(not self._last_stop_end)
 
         i = 1
@@ -877,8 +876,7 @@ class Robot:
 
         true_dist = abs(dist) - self.move_bias
         dist_to_target = true_dist
-
-        self.follow_pid._reset(follow_func(*follow_func_args))
+        self.dist_traveled = 0
 
         self._speed = speed * (1 if dist > 0 else -1)
         self._stop_end = stop_end
@@ -886,7 +884,8 @@ class Robot:
         self._follow_func = follow_func
         self._follow_func_args = follow_func_args
 
-        self.dist_traveled = 0
+
+        self.follow_pid._reset(follow_func(*follow_func_args))
         self._reset_dist(not self._last_stop_end)
 
         if not self._last_stop_end:
@@ -992,17 +991,17 @@ class Robot:
             self.left_wheel.verbose = verbose
             self.right_wheel.verbose = verbose
 
-        pid._reset(-self._angle())
 
+        # General settings:
         self._speed = speed
-
         self._stop_end = stop_end
         self.dist_traveled = 0
         self.angle_traveled = 0
 
+
+        # Turn settings:
         self._direction = direction
         self._turn_angle = 1
-        self._stop_end = stop_end
 
         small_rad = radius - (self._axle_len / 2)
         self._big_rad = radius + (self._axle_len / 2)
@@ -1018,6 +1017,7 @@ class Robot:
             self._org_left_speed = speed * self._turn_ratio * direction
             self._org_right_speed = speed * direction
 
+        # Follow settings:
         self._follow_func = follow_func
         self._follow_func_args = follow_func_args
         
@@ -1025,6 +1025,7 @@ class Robot:
         dist_to_target = stop_func(self, *stop_func_args)
 
 
+        pid._reset(-self._angle())
         self._reset_dist(not self._last_stop_end)
 
         if not self._last_stop_end:
