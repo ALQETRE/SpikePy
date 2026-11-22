@@ -876,16 +876,20 @@ class Robot:
             self.right_wheel.verbose = verbose
 
         true_dist = abs(dist) - self.move_bias
+        dist_to_target = true_dist
 
         self.follow_pid._reset(follow_func(*follow_func_args))
 
-        speed *= 1 if dist > 0 else -1
+        self._speed = speed * (1 if dist > 0 else -1)
+        self._stop_end = stop_end
 
-        dist_traveled = 0
-        self._reset_slip()
+        self._follow_func = follow_func
+        self._follow_func_args = follow_func_args
+
+        self.dist_traveled = 0
         self._reset_dist(not self._last_stop_end)
 
-        if not stop_end:
+        if not self._last_stop_end:
             avg = (self._left_speed + self._right_speed) / 2
             self._left_speed = avg
             self._right_speed = avg
@@ -893,45 +897,14 @@ class Robot:
         i = 1
         stopwatch = StopWatch()
 
-        while abs(dist_traveled) < true_dist:
-
+        while dist_to_target > 0:
             dt = stopwatch.time() / 1000 / i
             i += 1
 
-            self._acceleration(speed, speed, self.move_acc, dt)
+            self.follow_loop(dist_to_target, dt, self.follow_pid, self.follow_acc)
 
-            correction = self.move_pid._calc(follow_func(*follow_func_args), dt) * self._axle_len / 2
-
-            # print(f"Angle: {angle}")
-            # print(f"Correction: {correction}")
-            # print(f"Speed scale: {self._speed_scale(-angle)}")
-            # print(f"Left Speed (no correction): {self._left_speed}")
-            # print(f"Right Speed (no correction): {self._right_speed}")
-
-            speed_scale = self._speed_scale(follow_func(*follow_func_args))
-
-            left_speed = (self._left_speed * speed_scale) + correction
-            right_speed = (self._right_speed * speed_scale) - correction
-
-            # print(f"Left Speed: {left_speed}")
-            # print(f"Right Speed: {right_speed}")
-
-            # left_speed, right_speed = self._slip_correction(left_speed, right_speed, current_acc, dt)
-
-            wait(3)
-
-            self.left_wheel._run(left_speed)
-            self.right_wheel._run(right_speed)
-
-            dist_traveled = self._get_dist()
-
-            # print(f"Distance: {dist_traveled}")
-
-            t_to_stop = self._calc_t_from_acc(self.min_speed - self._left_speed, self.min_speed - self._right_speed, self.move_acc)
-            dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
-
-            if dist_to_stop > abs(dist - dist_traveled):
-                speed = self.min_speed * (1 if dist > 0 else -1)
+            dist_to_target = true_dist - abs(self.dist_traveled)
+            
 
         if stop_end:
             self.stop()
@@ -945,7 +918,45 @@ class Robot:
         self.left_wheel.verbose = old_verbose
         self.right_wheel.verbose = old_verbose
 
-    def until(self, speed: int, loop: function, stop_func: function, pid: Pid, acc: float, stop_func_args: list = [], radius: int = 0, direction: Direction = Direction.CLOCKWISE, stop_end: bool = True, one_time_min_speed: int = None, verbose: bool = None):
+    def follow_loop(self, dist_to_target, dt, pid, acc):
+        self._acceleration(self._speed, self._speed, self.move_acc, dt)
+        
+        correction = self.move_pid._calc(self._follow_func(*self._follow_func_args), dt) * self._axle_len / 2
+
+        # print(f"Angle: {angle}")
+        # print(f"Correction: {correction}")
+        # print(f"Speed scale: {self._speed_scale(-angle)}")
+        # print(f"Left Speed (no correction): {self._left_speed}")
+        # print(f"Right Speed (no correction): {self._right_speed}")
+
+        speed_scale = self._speed_scale(self._follow_func(*self._follow_func_args))
+
+        left_speed = (self._left_speed * speed_scale) + correction
+        right_speed = (self._right_speed * speed_scale) - correction
+
+        # print(f"Left Speed: {left_speed}")
+        # print(f"Right Speed: {right_speed}")
+
+        # left_speed, right_speed = self._slip_correction(left_speed, right_speed, current_acc, dt)
+
+        wait(3)
+
+        self.left_wheel._run(left_speed)
+        self.right_wheel._run(right_speed)
+
+        self.dist_traveled = self._get_dist()
+
+        # print(f"Distance: {dist_traveled}")
+
+        if self._stop_end:
+            t_to_stop = self._calc_t_from_acc(self.min_speed - self._left_speed, self.min_speed - self._right_speed, self.move_acc)
+            dist_to_stop = (abs(self._acc_combine(self._left_speed, self._right_speed)) * t_to_stop) / 2
+
+            self._speed = sqrt(2 * acc * min(dist_to_target, dist_to_stop)) * (1 if self._speed > 0 else -1)
+
+
+
+    def until(self, speed: int, loop: function, stop_func: function, pid: Pid, acc: float, stop_func_args: list = [], radius: int = 0, direction: Direction = Direction.CLOCKWISE, follow_func: function = None, follow_func_args: list = [], stop_end: bool = True, one_time_min_speed: int = None, verbose: bool = None):
         """
         Repeats the loop function until the return value of stop_func <= 0.
 
@@ -1006,6 +1017,9 @@ class Robot:
         else:
             self._org_left_speed = speed * self._turn_ratio * direction
             self._org_right_speed = speed * direction
+
+        self._follow_func = follow_func
+        self._follow_func_args = follow_func_args
         
 
         dist_to_target = stop_func(self, *stop_func_args)
