@@ -230,6 +230,48 @@ def red():
 
     bot.wait_for_button()
 
+def yellow():
+    yellow_settings = Setting(
+        move_acc= 350,
+        turn_acc= 200,
+        move_pid= Pid(3, 1, 3),
+        turn_pid= Pid(0.5, 0, 0.5),
+        align_pid= Pid(5, 5, 1),
+        move_bias= 0,
+        turn_bias= 0,
+        min_speed= 50
+    )
+    bot.set_settings(yellow_settings)
+
+    
+    actuator_right.set_actuator(-2.88, 30)
+    actuator_left.set_actuator(2.88, 180)
+
+    bot.reset_angle()
+
+    bot.move(300, 690)
+    bot.turn(100, -35)
+    bot.move(300, -230)
+    print("negr")
+    actuator_right.actuate(300, 150)
+
+    print("negr2")
+    bot.turn(100, 37)
+    bot.move(300, -100)
+    actuator_right.actuate(300, -10)
+
+    bot.turn(100, -35)
+    bot.move(300, 300)
+    bot.turn(100, 89)
+    bot.move(300, 240)
+    actuator_left.actuate(300, 100)
+    actuator_left.actuate(300, 0)
+    bot.turn(100, -87, bot.WHEEL_ROTATION, Direction.BACKWARD)
+    bot.move(300, -38)
+
+
+
+
 
 
 
@@ -280,6 +322,8 @@ def do_track():
             green()
         elif track_color == colors["Red"]:
             red()
+        elif track_color == colors["Yellow"]:
+            yellow()
         else:
             bot.hub.speaker.beep(700, 400)
             wait(100)
