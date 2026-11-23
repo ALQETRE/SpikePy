@@ -210,25 +210,24 @@ def red():
     )
     bot.set_settings(red_settings)
 
-    actuator_left.set_actuator(-2.88, 90, -15)
-    actuator_right.set_actuator(2.88, 40, -20)
+    actuator_left.set_actuator(-2.88, 91, 150)
+    actuator_right.set_actuator(2.88, 60, -20)
 
     bot.reset_angle()
 
     actuator_left.actuate(400, 0)
     actuator_right.actuate(400, 0)
 
-    # bot.wait_for_button()
+    bot.wait_for_button()
 
-    # actuator_right.actuate(400, 100)
-    # bot.move(300, -100)
-    # actuator_right.actuate(400, 0)
+    actuator_right.actuate(400, 100)
+    actuator_right.actuate(400, 0)
 
     bot.wait_for_button()
 
     actuator_left.actuate(300, 100)
+    actuator_left.actuate(300, 0)
 
-    bot.wait_for_button()
 
 
 
