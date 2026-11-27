@@ -230,7 +230,7 @@ def red():
     actuator_right.actuate(200, 0)
 
     actuator_left.actuate(300, 100)
-    actuator_left.actuate(300, 50)
+    actuator_left.actuate(300, 20)
 
 
 
